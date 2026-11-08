@@ -33,3 +33,11 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+  - package-ecosystem: docker
+    directory: /testlab/clab/linux
+    schedule:
+      interval: weekly
+    # New versions are proposed only after a week: compromised releases are
+    # usually found and withdrawn within days.
+    cooldown:
+      default-days: 7

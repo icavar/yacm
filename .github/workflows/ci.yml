@@ -127,7 +127,7 @@ jobs:
 
       - name: govulncheck (known vulnerabilities in Go code and modules)
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
           "$(go env GOPATH)/bin/govulncheck" ./...
 
       - name: npm audit (frontend dependencies)
