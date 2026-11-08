@@ -35,6 +35,7 @@
   .hero h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.15; margin: 0 0 14px; letter-spacing: -.02em; }
   .hero p.lead { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); max-width: 760px; margin: 0 auto 26px; }
   .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .support .cta { justify-content: flex-start; }
   .btn { display: inline-block; padding: 11px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--panel); }
   .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
   .platforms { margin-top: 12px; font-size: 14px; color: var(--muted); }
@@ -60,7 +61,6 @@
   .gallery img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); box-shadow: var(--shadow); }
   .gallery figcaption { margin-top: 8px; color: var(--muted); font-size: 15px; }
   .gallery figcaption b { color: var(--text); }
-  .support { text-align: center; }
   footer { padding: 30px 0 40px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   @media (max-width: 560px) { nav a:not(.keep) { display: none; } }
@@ -71,9 +71,10 @@
   <header class="top">
     <a class="brand" href="./"><img src="images/icon.svg" alt="">YACM</a>
     <nav>
+      <a href="#security">Security</a>
       <a href="#features">Features</a>
       <a href="#screenshots">Screenshots</a>
-      <a href="#security">Security</a>
+      <a href="#support">Support</a>
       <a class="keep" href="https://github.com/icavar/yacm">GitHub</a>
     </nav>
   </header>
@@ -89,6 +90,27 @@
     <div class="shot"><img src="images/yacm.png" width="1440" height="900" alt="YACM: a session tree with data centre, branch and lab groups and a team library next to a Cisco IOS XE session"></div>
   </div>
 </div>
+
+<section id="security" class="security">
+  <div class="wrap">
+    <h2>Secure by default</h2>
+    <p class="sub">Made for regulated networks: YACM helps you meet NIS2, ISO 27001 and PCI DSS. <a href="https://github.com/icavar/yacm/blob/main/docs/security-compliance.md">Security and compliance details</a></p>
+    <ul class="checks">
+      <li>Passwords only in an encrypted vault (AES-256-GCM, Argon2id), locked after 15 idle minutes</li>
+      <li>No telemetry; the update check is off unless you switch it on</li>
+      <li>Host keys checked on every hop; changed keys are a warning</li>
+      <li>Secrets masked in session logs</li>
+      <li>Team libraries without passwords; foreign tunnels switched off</li>
+      <li>Public source, SBOM and build provenance for every release</li>
+      <li>Signed and notarised macOS app</li>
+      <li>Published vulnerability process: security@yacm.app</li>
+    </ul>
+    <p class="badges">
+      <a href="https://www.bestpractices.dev/projects/16463"><img src="https://www.bestpractices.dev/projects/16463/badge" alt="OpenSSF Best Practices badge" height="20"></a>
+      <a href="https://scorecard.dev/viewer/?uri=github.com/icavar/yacm"><img src="https://api.scorecard.dev/projects/github.com/icavar/yacm/badge" alt="OpenSSF Scorecard" height="20"></a>
+    </p>
+  </div>
+</section>
 
 <section id="features">
   <div class="wrap">
@@ -133,31 +155,11 @@
   </div>
 </section>
 
-<section id="security" class="security">
-  <div class="wrap">
-    <h2>Secure by default</h2>
-    <p class="sub">Made for regulated networks: YACM helps you meet NIS2, ISO 27001 and PCI DSS. <a href="https://github.com/icavar/yacm/blob/main/docs/security-compliance.md">Security and compliance details</a></p>
-    <ul class="checks">
-      <li>Passwords only in an encrypted vault (AES-256-GCM, Argon2id), locked after 15 idle minutes</li>
-      <li>No telemetry; the update check is off unless you switch it on</li>
-      <li>Host keys checked on every hop; changed keys are a warning</li>
-      <li>Secrets masked in session logs</li>
-      <li>Team libraries without passwords; foreign tunnels switched off</li>
-      <li>Public source, SBOM and build provenance for every release</li>
-      <li>Signed and notarised macOS app</li>
-      <li>Published vulnerability process: security@yacm.app</li>
-    </ul>
-    <p class="badges">
-      <a href="https://www.bestpractices.dev/projects/16463"><img src="https://www.bestpractices.dev/projects/16463/badge" alt="OpenSSF Best Practices badge" height="20"></a>
-      <a href="https://scorecard.dev/viewer/?uri=github.com/icavar/yacm"><img src="https://api.scorecard.dev/projects/github.com/icavar/yacm/badge" alt="OpenSSF Scorecard" height="20"></a>
-    </p>
-  </div>
-</section>
 
-<section class="support">
+<section id="support" class="support">
   <div class="wrap">
-    <h2>Free and open source</h2>
-    <p class="sub">YACM is GPL-licensed and stays free. If you would like it to keep improving and getting new features, you can support its development.</p>
+    <h2>Donations and support</h2>
+    <p class="sub">YACM is free and open source under the GPL, and it stays that way. If you would like it to keep improving and getting new features, you can support its development.</p>
     <div class="cta">
       <a class="btn" href="https://github.com/sponsors/icavar">GitHub Sponsors</a>
       <a class="btn" href="https://ko-fi.com/yacm_app">Ko-fi</a>
