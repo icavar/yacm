@@ -48,6 +48,8 @@
   .card h3 { margin: 0 0 6px; font-size: 17px; }
   .card p { margin: 0; color: var(--muted); font-size: 15px; }
   .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; }
+  .badges img { display: block; height: 20px; width: auto; }
   .security { background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   ul.checks { list-style: none; padding: 0; margin: 0; columns: 2 300px; column-gap: 32px; }
   ul.checks li { break-inside: avoid; padding: 0 0 10px 26px; position: relative; }
@@ -145,6 +147,10 @@
       <li>Signed and notarised macOS app</li>
       <li>Published vulnerability process: security@yacm.app</li>
     </ul>
+    <p class="badges">
+      <a href="https://www.bestpractices.dev/projects/16463"><img src="https://www.bestpractices.dev/projects/16463/badge" alt="OpenSSF Best Practices badge" height="20"></a>
+      <a href="https://scorecard.dev/viewer/?uri=github.com/icavar/yacm"><img src="https://api.scorecard.dev/projects/github.com/icavar/yacm/badge" alt="OpenSSF Scorecard" height="20"></a>
+    </p>
   </div>
 </section>
 

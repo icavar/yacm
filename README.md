@@ -3,6 +3,7 @@
 [![Latest release](https://img.shields.io/github/v/release/icavar/yacm?include_prereleases&label=release)](https://github.com/icavar/yacm/releases)
 [![CI](https://github.com/icavar/yacm/actions/workflows/ci.yml/badge.svg)](https://github.com/icavar/yacm/actions/workflows/ci.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/icavar/yacm/badge)](https://scorecard.dev/viewer/?uri=github.com/icavar/yacm)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16463/badge)](https://www.bestpractices.dev/projects/16463)
 [![License: GPL v3+](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
 **One connection manager for all your devices. Free and open source.**
