@@ -22,10 +22,14 @@ Security problems do not go into issues: see SECURITY.md.
 1. Build the frontend first (`cd frontend && npm ci && npm run build`), then
    run `gofmt -l .`, `go vet ./...` and `go test ./...`. The build steps are
    in docs/development.md.
-2. Keep changes focused: one fix or feature per pull request, with tests for
-   the Go parts. Large pull requests are split up or declined.
-3. User-facing text is in English and short.
-4. Between 0.9 and 1.0 YACM takes fixes only, no new features.
+2. Keep changes focused: one fix or feature per pull request. Large pull
+   requests are split up or declined.
+3. New functionality and bug fixes come with automated tests: Go tests for
+   the program, Playwright tests for changes in the user interface
+   (docs/development.md says how to run them). CI runs them on every pull
+   request.
+4. User-facing text is in English and short.
+5. Between 0.9 and 1.0 YACM takes fixes only, no new features.
 
 ## How changes get in
 

@@ -31,7 +31,7 @@ Release candidates (`-rc.N`) are for testing and get no fixes of their own.
 - Team libraries never contain secrets; each user maps their own logins.
 - YACM sends no telemetry and contacts no server except the devices, jump
   hosts and services (such as NetBox) you configure. The optional update
-  check (asked once, off unless you agree) asks GitHub for the list of
+  check (off unless you switch it on in Settings) asks GitHub for the list of
   releases and sends nothing else.
 - Secure defaults: the vault locks after 15 idle minutes, secrets in session
   logs are masked, agent forwarding is off, unknown and changed host keys are
