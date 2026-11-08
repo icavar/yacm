@@ -1,0 +1,51 @@
+name: Go module update
+
+# Run by hand to update Go modules where the developer machine cannot reach
+# the Go proxy: runs go get with the given arguments, go mod tidy, builds,
+# vets and tests, then pushes the result to the go-mod-update branch.
+on:
+  workflow_dispatch:
+    inputs:
+      args:
+        description: Arguments for go get, e.g. golang.org/x/image@latest
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Frontend (go:embed needs it)
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: go get and tidy
+        env:
+          ARGS: ${{ github.event.inputs.args }}
+        run: |
+          go get $ARGS
+          go mod tidy
+          go build ./...
+          go vet ./...
+          go test ./...
+          git diff --stat
+      - name: Push the go-mod-update branch
+        env:
+          ARGS: ${{ github.event.inputs.args }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b go-mod-update
+          git commit -am "go get $ARGS"
+          git push -f origin go-mod-update

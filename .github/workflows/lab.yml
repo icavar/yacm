@@ -1,0 +1,126 @@
+# End-to-end tests against the containerlab test lab (testlab/clab):
+# jump host chains, file transfer, tunnels, proxies and file servers.
+#
+#   linux-fabric  on a GitHub runner, Linux routers instead of cEOS: on every
+#                 push to main that changes more than documentation
+#   ceos-fabric   on the maintainer's computer (self-hosted runner, label "clab") with the
+#                 Arista cEOS image: at night, only when main changed in the
+#                 last day, and on demand (before a release). Needs the
+#                 repository variable YACM_CLAB_RUNNER = true (testlab/README.md)
+#
+# Never on pull requests: the self-hosted runner must not run code from forks.
+# The runner is registered on a private repository (yacm-dev) only,
+# never on the public one: there the cEOS job tests the public main branch
+# (repository variable YACM_LAB_SOURCE = icavar/yacm), so only code that
+# is merged reaches that computer. The job never runs in a public repository.
+name: Lab
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
+  schedule:
+    - cron: '23 1 * * *'
+  workflow_dispatch:
+    inputs:
+      fabric:
+        description: 'Which lab'
+        type: choice
+        default: both
+        options: [both, linux, ceos]
+
+permissions:
+  contents: read
+
+jobs:
+  # At night: did main change (more than documentation) in the last day?
+  changed:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    outputs:
+      code: ${{ steps.log.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ vars.YACM_LAB_SOURCE || github.repository }}
+          ref: main
+          fetch-depth: 200
+      - id: log
+        run: |
+          n=$(git log --since='25 hours ago' --oneline -- . ':(exclude)*.md' ':(exclude)docs' | wc -l)
+          echo "$n commits in the last day"
+          echo "code=$([ "$n" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  linux-fabric:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fabric != 'ceos')
+    # Each lab has its own queue: a cEOS run waiting for the runner does
+    # not hold up the Linux lab.
+    concurrency:
+      group: lab-linux-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Containerlab
+        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.82.0
+      - name: Lab and tests
+        run: make -C testlab/clab e2e FABRIC=linux CLAB="sudo containerlab"
+      - name: Report
+        if: always()
+        run: testlab/clab/report.sh
+      - name: Logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-linux-logs
+          path: |
+            testlab/clab/.work/e2e.log
+            testlab/clab/.work/logs/
+          if-no-files-found: ignore
+
+  ceos-fabric:
+    needs: changed
+    if: >-
+      !cancelled() && vars.YACM_CLAB_RUNNER == 'true' && github.event.repository.private &&
+      ((github.event_name == 'workflow_dispatch' && inputs.fabric != 'linux') ||
+       (github.event_name == 'schedule' && needs.changed.outputs.code == 'true'))
+    runs-on: [self-hosted, linux, clab]
+    concurrency:
+      group: lab-ceos
+      cancel-in-progress: false
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ vars.YACM_LAB_SOURCE || github.repository }}
+          ref: ${{ vars.YACM_LAB_SOURCE && 'main' || github.ref }}
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: Lab and tests
+        run: make -C testlab/clab e2e FABRIC=ceos
+      - name: Report
+        if: always()
+        run: testlab/clab/report.sh
+      - name: Logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-ceos-logs
+          path: |
+            testlab/clab/.work/e2e.log
+            testlab/clab/.work/logs/
+          if-no-files-found: ignore

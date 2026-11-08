@@ -1,0 +1,13 @@
+[Bookmarks]
+SubRep=
+ImgNum=42
+jump box=#109#0%192.0.2.20%22%bastion%%-1%-1%%%%%0%0%0%_CurrentDrive_:\keys\b.ppk%%-1%0%0%0%%1080%%0%0%1#MobaFont%10%0%0%-1%15%236,236,236%30,30,30%180,180,192%0%-1%0%%xterm%-1%-1%_Std_Colors_0_%80%24%0%1%-1%<none>%%0%0%-1#0#Café __DIEZE__1#-1
+[Bookmarks_1]
+SubRep=Zagreb\Core
+ImgNum=41
+zg-r1=#109#0%10.20.0.1%2222%admin%%-1%-1%%192.0.2.20__PIPE__192.0.2.21%22__PIPE__2022%jump__PIPE__jump2%0%0%0%%%-1%0%0%0%%1080%%0%0%1#MobaFont%10#0# #-1
+zg-sw-telnet= #98#1%10.20.0.9%23%%%2%%%%%0%0%%1080%#DejaVu Sans Mono%10#0# #-1
+zg-console= #131#8%-2%1009600%3%0%0%1%2%COM7  (USB Serial Port (COM7))#DejaVu Sans Mono%10#0# #-1
+zg-rdp= #91#4%10.20.0.50%3389%Administrator%0%-1%-1%-1%-1%0%0%-1%%%22%%0%0%%-1%-1%0%%0%-1%-1%0%-1%1080%%0#0# #-1
+[Passwords]
+ssh22:admin@10.20.0.1=AAAA

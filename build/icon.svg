@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="1024" height="1024">
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#242a31"/>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="none" stroke="#3a434e" stroke-width="4"/>
+  <!-- RJ45 / console jack seen from the front -->
+  <path d="M52 68 H204 V164 H160 V188 H96 V164 H52 Z" fill="#1a1e23" stroke="#dde3e9" stroke-width="12" stroke-linejoin="round"/>
+  <!-- contacts in cable colours: SSH, Telnet, Serial -->
+  <path d="M92 88 V130" stroke="#7cc59a" stroke-width="16" stroke-linecap="round"/>
+  <path d="M128 88 V130" stroke="#e2a64b" stroke-width="16" stroke-linecap="round"/>
+  <path d="M164 88 V130" stroke="#7fc6e4" stroke-width="16" stroke-linecap="round"/>
+  <!-- link LED -->
+  <circle cx="204" cy="52" r="10" fill="#7cc59a"/>
+</svg>

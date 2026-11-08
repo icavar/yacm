@@ -1,0 +1,27 @@
+# comment
+Host bastion
+    HostName 192.0.2.50
+    User jump
+    IdentityFile ~/.ssh/id_bastion
+
+Host core-* edge1
+    User netops
+    ProxyJump bastion
+
+Host core-r1
+    HostName 10.50.0.1
+    Port 2222
+
+Host old-asa
+    HostName 10.50.9.1
+    KexAlgorithms +diffie-hellman-group1-sha1
+    Ciphers +aes128-cbc
+
+Include conf.d/*.conf
+
+Match host *.lab
+    User ignored
+
+Host *
+    User defaultuser
+    ForwardAgent no

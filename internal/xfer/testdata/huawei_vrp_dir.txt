@@ -1,0 +1,35 @@
+Directory of cfcard:/
+
+  Idx  Attr     Size(Byte)  Date        Time       FileName                     
+    0  dr-x              -  Oct 30 2026 02:00:00   $_checkpoint                 
+    1  dr-x              -  Jun 24 2021 03:00:00   $_install_hpg                
+    2  dr-x              -  Jun 24 2021 03:00:00   $_install_mod                
+    3  dr-x              -  Aug 31 2022 09:40:24   $_license                    
+    4  dr-x              -  Jun 06 2019 00:25:27   $_security_info              
+    5  dr-x              -  Nov 24 2023 01:41:53   $_startup                    
+    6  dr-x              -  Nov 24 2023 01:45:43   $_system                     
+    7  dr-x              -  Jun 30 2022 00:42:10   $_user                       
+    8  drwx              -  Oct 30 2026 13:32:43   KPISTAT                      
+    9  -rw-          2,164  Aug 29 2022 14:12:37   LICNE20E-S2F_V800R010_20220824NG5160.dat
+   10  -rw-    328,071,444  Nov 23 2023 13:10:46   NE20E-S2F_V800R022C00SPC600.cc
+   11  -rw-     90,943,652  May 12 2021 22:17:16   NE20E-S2V800R010SPH153.PAT   
+   12  -rw-    264,784,732  Mar 17 2019 05:23:32   V800R010C10SPC500-NE20E-S2F.cc
+   13  -rw-              0  Nov 24 2023 01:44:23   backup_bkp_elb.txt           
+   14  -rw-            286  Nov 24 2023 01:46:01   backupelb.txt                
+   15  drwx              -  Jun 30 2022 00:42:37   bill                         
+   16  drwx              -  Nov 24 2023 01:46:07   business-trace               
+   17  -rw-         16,667  Oct 30 2026 00:00:41   device.sys                   
+   18  drwx              -  Oct 30 2026 05:09:01   diaginfo                     
+   19  -rw-          4,640  Aug 31 2022 09:40:21   lcsbox                       
+   20  -rw-         10,528  Nov 24 2023 01:44:25   lcsbox_ex                    
+   21  dr-x              -  Oct 30 2026 13:00:34   logfile                      
+   22  drwx              -  Mar 17 2019 05:21:59   lost+found                   
+   23  drwx              -  Oct 30 2026 13:35:00   pmdata                       
+   24  drwx              -  Oct 29 2026 20:33:43   said                         
+   25  drwx              -  Jun 24 2021 03:00:00   security                     
+   26  -rw-         11,116  Oct 30 2026 00:00:41   vrpcfg.zip                   
+   27  drwx              -  Nov 24 2023 01:42:00   ztp                          
+   28  -rw-          2,990  Oct 21 2021 06:39:49   ztp_20190531171140.log       
+   29  -rw-          7,687  Jun 30 2022 00:43:47   ztp_20220629224211.log       
+
+1,982,464 KB total (488,547 KB free)

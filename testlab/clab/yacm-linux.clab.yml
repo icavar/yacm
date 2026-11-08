@@ -1,0 +1,266 @@
+# YACM test lab (Linux routers instead of cEOS). Written by topology.py: change that, not this file.
+#
+#   host --mgmt-- bastion1 -- bastion2 -- edge1 --+-- spine1 --+-- leaf1 -- srv-sftp
+#   host --mgmt-- bastion-locked -------- edge2 --+-- spine2 --+-- leaf2 -- srv-web
+#                                                              +-- leaf3 -- srv-kbd
+#                                                              +-- leaf4 -- srv-legacy, ios1
+#
+# Only the bastions are reachable from this computer; everything else is
+# reached through them, as in a real network. Logins: lab / lab (ios1, the
+# YACM demo device: admin / cisco123).
+
+name: yacm
+mgmt:
+  network: yacm-mgmt
+  ipv4-subnet: 172.30.0.0/24
+topology:
+  nodes:
+    bastion1:
+      kind: linux
+      image: yacm-lab-linux:latest
+      mgmt-ipv4: 172.30.0.11
+      env: { ROLES: "gateway" }
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.0.1.1/30 dev eth1
+    bastion2:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "gateway" }
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip addr add 10.0.1.2/30 dev eth1
+        - ip addr add 10.0.2.1/30 dev eth2
+        - ip route replace 10.0.0.0/8 via 10.0.2.2
+    bastion-locked:
+      kind: linux
+      image: yacm-lab-linux:latest
+      mgmt-ipv4: 172.30.0.12
+      env: { ROLES: "locked" }
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.0.3.1/30 dev eth1
+        - ip route replace 10.0.0.0/8 via 10.0.3.2
+    srv-sftp:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.2.1.10/24 dev eth1
+        - ip route replace default via 10.2.1.1
+    srv-web:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "web" }
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.2.2.10/24 dev eth1
+        - ip route replace default via 10.2.2.1
+    srv-kbd:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "kbd" }
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.2.3.10/24 dev eth1
+        - ip route replace default via 10.2.3.1
+    srv-legacy:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "legacy" }
+      binds: [".work/id_ed25519.pub:/etc/yacm/authorized_keys:ro"]
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.2.4.10/24 dev eth1
+        - ip route replace default via 10.2.4.1
+    ios1:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      binds: [".work/yacm-demo-device:/usr/local/bin/yacm-demo-device:ro"]
+      cmd: /usr/local/bin/yacm-demo-device -ssh 0.0.0.0:22 -ssh-legacy "" -telnet 0.0.0.0:23 -hostname ios1 -flash /flash -hostkey /var/lib/yacm-demo/hostkey
+      exec:
+        - ip link set dev eth1 mtu 1500
+        - ip addr add 10.2.5.10/24 dev eth1
+        - ip route replace default via 10.2.5.1
+    edge1:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.1/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip addr add 10.0.2.2/30 dev eth1
+        - ip addr add 10.1.0.0/31 dev eth2
+        - ip addr add 10.1.0.2/31 dev eth3
+        - ip route replace 10.0.0.0/8 via 10.1.0.1
+        - ip route replace 10.255.0.12/32 via 10.1.0.3
+    edge2:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.2/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip addr add 10.0.3.2/30 dev eth1
+        - ip addr add 10.1.0.4/31 dev eth2
+        - ip addr add 10.1.0.6/31 dev eth3
+        - ip route replace 10.0.0.0/8 via 10.1.0.5
+        - ip route replace 10.255.0.12/32 via 10.1.0.7
+    spine1:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.11/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip link set dev eth4 mtu 1500
+        - ip link set dev eth5 mtu 1500
+        - ip link set dev eth6 mtu 1500
+        - ip addr add 10.1.0.1/31 dev eth1
+        - ip addr add 10.1.0.5/31 dev eth2
+        - ip addr add 10.1.1.0/31 dev eth3
+        - ip addr add 10.1.1.2/31 dev eth4
+        - ip addr add 10.1.1.4/31 dev eth5
+        - ip addr add 10.1.1.6/31 dev eth6
+        - ip route replace 10.0.2.0/30 via 10.1.0.0
+        - ip route replace 10.255.0.1/32 via 10.1.0.0
+        - ip route replace 10.0.3.0/30 via 10.1.0.4
+        - ip route replace 10.255.0.2/32 via 10.1.0.4
+        - ip route replace 10.2.1.0/24 via 10.1.1.1
+        - ip route replace 10.255.0.21/32 via 10.1.1.1
+        - ip route replace 10.2.2.0/24 via 10.1.1.3
+        - ip route replace 10.255.0.22/32 via 10.1.1.3
+        - ip route replace 10.2.3.0/24 via 10.1.1.5
+        - ip route replace 10.255.0.23/32 via 10.1.1.5
+        - ip route replace 10.2.4.0/24 via 10.1.1.7
+        - ip route replace 10.2.5.0/24 via 10.1.1.7
+        - ip route replace 10.255.0.24/32 via 10.1.1.7
+    spine2:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.12/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip link set dev eth4 mtu 1500
+        - ip link set dev eth5 mtu 1500
+        - ip link set dev eth6 mtu 1500
+        - ip addr add 10.1.0.3/31 dev eth1
+        - ip addr add 10.1.0.7/31 dev eth2
+        - ip addr add 10.1.2.0/31 dev eth3
+        - ip addr add 10.1.2.2/31 dev eth4
+        - ip addr add 10.1.2.4/31 dev eth5
+        - ip addr add 10.1.2.6/31 dev eth6
+        - ip route replace 10.0.0.0/8 via 10.1.0.2
+    leaf1:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.21/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip addr add 10.1.1.1/31 dev eth1
+        - ip addr add 10.1.2.1/31 dev eth2
+        - ip addr add 10.2.1.1/24 dev eth3
+        - ip route replace 10.0.0.0/8 via 10.1.1.0
+    leaf2:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.22/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip addr add 10.1.1.3/31 dev eth1
+        - ip addr add 10.1.2.3/31 dev eth2
+        - ip addr add 10.2.2.1/24 dev eth3
+        - ip route replace 10.0.0.0/8 via 10.1.1.2
+    leaf3:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.23/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip addr add 10.1.1.5/31 dev eth1
+        - ip addr add 10.1.2.5/31 dev eth2
+        - ip addr add 10.2.3.1/24 dev eth3
+        - ip route replace 10.0.0.0/8 via 10.1.1.4
+    leaf4:
+      kind: linux
+      image: yacm-lab-linux:latest
+      network-mode: none
+      env: { ROLES: "router" }
+      sysctls: { net.ipv4.ip_forward: 1 }
+      exec:
+        - ip addr add 10.255.0.24/32 dev lo
+        - ip link set dev eth1 mtu 1500
+        - ip link set dev eth2 mtu 1500
+        - ip link set dev eth3 mtu 1500
+        - ip link set dev eth4 mtu 1500
+        - ip addr add 10.1.1.7/31 dev eth1
+        - ip addr add 10.1.2.7/31 dev eth2
+        - ip addr add 10.2.4.1/24 dev eth3
+        - ip addr add 10.2.5.1/24 dev eth4
+        - ip route replace 10.0.0.0/8 via 10.1.1.6
+  links:
+    - endpoints: ["bastion1:eth1", "bastion2:eth1"]
+    - endpoints: ["bastion2:eth2", "edge1:eth1"]
+    - endpoints: ["bastion-locked:eth1", "edge2:eth1"]
+    - endpoints: ["edge1:eth2", "spine1:eth1"]
+    - endpoints: ["edge1:eth3", "spine2:eth1"]
+    - endpoints: ["edge2:eth2", "spine1:eth2"]
+    - endpoints: ["edge2:eth3", "spine2:eth2"]
+    - endpoints: ["spine1:eth3", "leaf1:eth1"]
+    - endpoints: ["spine1:eth4", "leaf2:eth1"]
+    - endpoints: ["spine1:eth5", "leaf3:eth1"]
+    - endpoints: ["spine1:eth6", "leaf4:eth1"]
+    - endpoints: ["spine2:eth3", "leaf1:eth2"]
+    - endpoints: ["spine2:eth4", "leaf2:eth2"]
+    - endpoints: ["spine2:eth5", "leaf3:eth2"]
+    - endpoints: ["spine2:eth6", "leaf4:eth2"]
+    - endpoints: ["leaf1:eth3", "srv-sftp:eth1"]
+    - endpoints: ["leaf2:eth3", "srv-web:eth1"]
+    - endpoints: ["leaf3:eth3", "srv-kbd:eth1"]
+    - endpoints: ["leaf4:eth3", "srv-legacy:eth1"]
+    - endpoints: ["leaf4:eth4", "ios1:eth1"]

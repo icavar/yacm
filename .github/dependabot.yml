@@ -1,0 +1,35 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    # New versions are proposed only after a week: compromised releases are
+    # usually found and withdrawn within days.
+    cooldown:
+      default-days: 7
+    groups:
+      go-modules:
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    # New versions are proposed only after a week: compromised releases are
+    # usually found and withdrawn within days.
+    cooldown:
+      default-days: 7
+    groups:
+      frontend:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # New versions are proposed only after a week: compromised releases are
+    # usually found and withdrawn within days.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]

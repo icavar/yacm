@@ -1,0 +1,150 @@
+---
+defaults:
+  sudo password: 53616c7465645f5f4e61bc000000000040c36c7a0c22235716c5446266d553ac
+environments:
+  __PAC__ROOT__:
+    _is_group: 0
+    children:
+      g-core: 1
+      s-lab: 1
+    name: __PAC__ROOT__
+  g-core:
+    _is_group: 1
+    children:
+      g-sub: 1
+      s-r1: 1
+      s-r2: 1
+    description: Core routers
+    name: Core
+    parent: __PAC__ROOT__
+  g-sub:
+    _is_group: 1
+    children:
+      s-ser: 1
+      s-tel: 1
+    name: Edge
+    parent: g-core
+  s-lab:
+    _is_group: 0
+    auth type: userpass
+    cluster: []
+    expect: []
+    ip: 10.9.9.9
+    method: RDP (xfreerdp)
+    name: Lab RDP
+    options: ''
+    parent: __PAC__ROOT__
+    pass: 53616c7465645f5f4e61bc00000000004ff50ffcb759cb44
+    port: 3389
+    user: u
+  s-r1:
+    _is_group: 0
+    auth fallback: 1
+    auth type: userpass
+    cluster:
+      - CORE
+      - ALL
+    description: "Main core\nrouter"
+    expect:
+      - active: 1
+        expect: 'Password:'
+        hidden: 1
+        on_fail: -1
+        on_match: -1
+        return: 1
+        send: 53616c7465645f5f4e61bc000000000006dd1eac77707405793ec01944851d09
+        time_out: -1
+      - active: 1
+        expect: '#'
+        hidden: 0
+        on_fail: -1
+        on_match: -1
+        return: 1
+        send: terminal length 0
+        time_out: 10
+      - active: 0
+        expect: x
+        hidden: 0
+        on_fail: -1
+        on_match: -1
+        return: 0
+        send: y
+        time_out: -1
+    ip: 10.0.0.1
+    jump ip: 192.0.2.10
+    jump key: ''
+    jump pass: jp-plain
+    jump port: 2222
+    jump user: jumper
+    local after:
+      - ask: 0
+        command: echo done
+        default: 1
+    local before:
+      - ask: 1
+        command: ping -c1 10.0.0.1
+        default: 1
+    macros:
+      - confirm: 0
+        intro: 1
+        txt: show ip bgp summary
+    method: SSH
+    name: R1 core
+    options: ' -o "ConnectTimeout=5"'
+    parent: g-core
+    pass: 53616c7465645f5f4e61bc000000000025a9537bd042f73f3739638d8d2e0e39
+    passphrase: 53616c7465645f5f4e61bc00000000005c4aa135f78c9e29
+    passphrase user: ''
+    port: 22
+    public key: ''
+    title: R1
+    use proxy: 0
+    user: admin
+    variables:
+      - hide: 1
+        txt: 53616c7465645f5f4e61bc00000000009945f99648e6122970f88a1640afab89
+      - hide: 0
+        txt: plainvar
+  s-r2:
+    _is_group: 0
+    auth type: publickey
+    cluster:
+      - CORE
+    expect: []
+    ip: 10.0.0.2
+    method: SSH
+    name: R2 core
+    options: ''
+    parent: g-core
+    pass: 53616c7465645f5f4e61bc00000000005c4aa135f78c9e29
+    passphrase: 53616c7465645f5f4e61bc000000000023db07006aade7ae38c99a24214a10d4
+    passphrase user: admin
+    port: 22
+    public key: /home/ivan/.ssh/id_ed25519
+    user: admin
+  s-ser:
+    _is_group: 0
+    auth type: manual
+    cluster: []
+    expect: []
+    ip: ''
+    method: Serial (cu)
+    name: Console
+    options: ' -l /dev/ttyUSB0 -s 9600 --parity=none'
+    parent: g-sub
+    pass: 53616c7465645f5f4e61bc00000000005c4aa135f78c9e29
+    port: ''
+    user: ''
+  s-tel:
+    _is_group: 0
+    auth type: userpass
+    cluster: []
+    expect: []
+    ip: 10.0.1.5
+    method: Telnet
+    name: Old switch
+    options: ' -4'
+    parent: g-sub
+    pass: 53616c7465645f5f4e61bc0000000000eb2e94353e556b74
+    port: 23
+    user: cisco

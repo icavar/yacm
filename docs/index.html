@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YACM: connection manager for network engineers</title>
+<meta name="description" content="YACM is a free, open-source SSH, telnet and serial console manager for network engineers and teams that look after hundreds or thousands of devices. Windows, macOS and Linux.">
+<meta property="og:title" content="YACM: Yet Another Connection Manager">
+<meta property="og:description" content="Free, open-source SSH, telnet and serial console manager for network teams.">
+<meta property="og:image" content="https://yacm.app/images/yacm.png">
+<link rel="icon" href="images/icon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1b1f24; --muted: #5a6573; --line: #dfe3e8;
+    --accent: #2f6fd1; --accent-text: #ffffff; --green: #2f9e63; --amber: #c27c16; --blue: #2b8bbd;
+    --shadow: 0 10px 30px rgba(20, 30, 45, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a; --panel: #1a1e24; --text: #e6eaef; --muted: #9aa5b1; --line: #2a3038;
+      --accent: #8fb4ff; --accent-text: #0f1a2e; --green: #7cc59a; --amber: #e2a64b; --blue: #7fc6e4;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--text); text-decoration: none; }
+  .brand img { width: 34px; height: 34px; }
+  nav a { margin-left: 18px; color: var(--muted); text-decoration: none; font-size: 15px; }
+  nav a:hover { color: var(--text); }
+  .hero { padding: 40px 0 24px; text-align: center; }
+  .hero h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.15; margin: 0 0 14px; letter-spacing: -.02em; }
+  .hero p.lead { font-size: clamp(17px, 2.2vw, 20px); color: var(--muted); max-width: 760px; margin: 0 auto 26px; }
+  .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 11px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); color: var(--text); background: var(--panel); }
+  .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  .platforms { margin-top: 12px; font-size: 14px; color: var(--muted); }
+  .shot { margin: 34px auto 10px; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--line); }
+  .shot img { display: block; width: 100%; height: auto; }
+  section { padding: 42px 0; }
+  h2 { font-size: 28px; margin: 0 0 8px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+  .security { background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  ul.checks { list-style: none; padding: 0; margin: 0; columns: 2 300px; column-gap: 32px; }
+  ul.checks li { break-inside: avoid; padding: 0 0 10px 26px; position: relative; }
+  ul.checks li::before { content: ""; position: absolute; left: 4px; top: .55em; width: 9px; height: 9px; border-radius: 2px; background: var(--green); }
+  .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  @media (max-width: 720px) { .gallery { grid-template-columns: 1fr; } }
+  .gallery figure { margin: 0; }
+  .gallery img { display: block; width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); box-shadow: var(--shadow); }
+  .gallery figcaption { margin-top: 8px; color: var(--muted); font-size: 15px; }
+  .gallery figcaption b { color: var(--text); }
+  .support { text-align: center; }
+  footer { padding: 30px 0 40px; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  @media (max-width: 560px) { nav a:not(.keep) { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./"><img src="images/icon.svg" alt="">YACM</a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#security">Security</a>
+      <a class="keep" href="https://github.com/icavar/yacm">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>One connection manager for the newest<br>and the oldest gear</h1>
+    <p class="lead">YACM is a free, open-source SSH, telnet and serial console manager for network engineers and for teams that look after hundreds or thousands of devices.</p>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/icavar/yacm/releases">Download</a>
+      <a class="btn" href="https://github.com/icavar/yacm/blob/main/docs/guide.md">Read the user guide</a>
+    </div>
+    <p class="platforms">Windows 10 and 11 · macOS 13 or newer · Linux · no installation, no account, no telemetry</p>
+    <div class="shot"><img src="images/yacm.png" width="1440" height="900" alt="YACM: a session tree with data centre, branch and lab groups and a team library next to a Cisco IOS XE session"></div>
+  </div>
+</div>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Built for teams and large networks</h2>
+    <p class="sub">The things that matter when many people share many devices.</p>
+    <div class="grid">
+      <div class="card"><h3>Team libraries</h3><p>Publish a group of sessions as one file on a share or in git. Colleagues see the same devices, read-only, and log in with their own accounts. Libraries never contain passwords.</p></div>
+      <div class="card"><h3>Credential profiles</h3><p>One login for many sessions. When your directory password changes, change it once. Profiles also fill in telnet and serial logins.</p></div>
+      <div class="card"><h3>Group defaults and bulk edits</h3><p>A group gives its sessions a login, a jump host, an algorithm profile and colours. Move a site behind a new bastion by changing one group.</p></div>
+      <div class="card"><h3>Find among thousands</h3><p>One field filters the tree and connects; Go to session ranks matches among thousands of sessions and remembers the ones you opened last.</p></div>
+      <div class="card"><h3>Import what you have</h3><p>SecureCRT, Xshell, MobaXterm, mRemoteNG, PuTTY, Ásbrú, ssh config, CSV and Excel lists, and NetBox. Saved passwords go into the vault.</p></div>
+      <div class="card"><h3>Type to many, saved commands</h3><p>Send the same commands to several sessions, keep a library of commands per vendor, and highlight errors and alerts in every session.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Old and new devices, through any path</h2>
+    <p class="sub">From post-quantum SSH to a console cable.</p>
+    <div class="grid">
+      <div class="card"><h3><span class="dot" style="background:var(--green)"></span>SSH</h3><p>Modern and post-quantum algorithms by default, compatible and legacy profiles for older gear, keys, agents, .ppk files and certificates, host key checks on every hop.</p></div>
+      <div class="card"><h3><span class="dot" style="background:var(--amber)"></span>Telnet</h3><p>For the devices that never learnt SSH, with login automation and telnet break.</p></div>
+      <div class="card"><h3><span class="dot" style="background:var(--blue)"></span>Serial consoles</h3><p>Any baud rate and line setting, USB adapters by name, break for ROMMON and password recovery.</p></div>
+      <div class="card"><h3>Jump hosts</h3><p>Chains of jump hosts with their own logins and MFA prompts, per session or for a whole group.</p></div>
+      <div class="card"><h3>Files and file servers</h3><p>A Files tab for SFTP and SCP with MD5 checks, command output to a file through the session, and TFTP, HTTP and SCP servers with the copy command written for Cisco, Arista, Juniper and Linux.</p></div>
+      <div class="card"><h3>Tunnels</h3><p>Local, remote and dynamic port forwards, a SOCKS and HTTP proxy, and tunnels that bring the file servers to devices behind a jump host and to servers behind a VPN.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="screenshots">
+  <div class="wrap">
+    <h2>See it at work</h2>
+    <p class="sub">Real sessions against the YACM demo device.</p>
+    <div class="gallery">
+      <figure><a href="images/02-type-to-many.png"><img src="images/02-type-to-many.png" width="1440" height="900" loading="lazy" alt="Type to many: one command sent to four sessions in a 2x2 split view"></a><figcaption><b>Type to many.</b> One command to four devices in a split view.</figcaption></figure>
+      <figure><a href="images/03-files.png"><img src="images/03-files.png" width="1440" height="900" loading="lazy" alt="Files tab: an IOS XE image sent to flash: with the MD5 check"></a><figcaption><b>Files tab.</b> On the session's own SSH connection, with the MD5 check.</figcaption></figure>
+      <figure><a href="images/04-file-servers.png"><img src="images/04-file-servers.png" width="1440" height="900" loading="lazy" alt="File servers: TFTP running and the copy command written for Cisco IOS XE"></a><figcaption><b>File servers.</b> YACM writes the copy command and types it into the session.</figcaption></figure>
+      <figure><a href="images/05-team-guard.png"><img src="images/05-team-guard.png" width="1440" height="900" loading="lazy" alt="A team library session that now points to another address: YACM asks before connecting"></a><figcaption><b>Team libraries.</b> YACM asks before your login goes to a changed address.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="security" class="security">
+  <div class="wrap">
+    <h2>Secure by default</h2>
+    <p class="sub">Made for regulated networks: YACM helps you meet NIS2, ISO 27001 and PCI DSS. <a href="https://github.com/icavar/yacm/blob/main/docs/security-compliance.md">Security and compliance details</a></p>
+    <ul class="checks">
+      <li>Passwords only in an encrypted vault (AES-256-GCM, Argon2id), locked after 15 idle minutes</li>
+      <li>No telemetry; the update check is off unless you switch it on</li>
+      <li>Host keys checked on every hop; changed keys are a warning</li>
+      <li>Secrets masked in session logs</li>
+      <li>Team libraries without passwords; foreign tunnels switched off</li>
+      <li>Public source, SBOM and build provenance for every release</li>
+      <li>Signed and notarised macOS app</li>
+      <li>Published vulnerability process: security@yacm.app</li>
+    </ul>
+  </div>
+</section>
+
+<section class="support">
+  <div class="wrap">
+    <h2>Free and open source</h2>
+    <p class="sub">YACM is GPL-licensed and stays free. If you would like it to keep improving and getting new features, you can support its development.</p>
+    <div class="cta">
+      <a class="btn" href="https://github.com/sponsors/icavar">GitHub Sponsors</a>
+      <a class="btn" href="https://ko-fi.com/yacm_app">Ko-fi</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 The YACM Authors · <a href="https://github.com/icavar/yacm/blob/main/LICENSE">GPL-3.0-or-later</a> with <a href="https://github.com/icavar/yacm/blob/main/NOTICE.md">additional terms</a></span>
+    <span><a href="https://github.com/icavar/yacm/issues">Issues</a> · <a href="https://github.com/icavar/yacm/blob/main/SECURITY.md">Security</a> · support@yacm.app</span>
+  </div>
+</footer>
+</body>
+</html>

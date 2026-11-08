@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VanDyke version="3.0">
+  <key name="Sessions">
+    <key name="Default"><string name="Protocol Name">SSH2</string><string name="Hostname"></string></key>
+    <key name="Core">
+      <key name="R1">
+        <string name="Protocol Name">SSH2</string>
+        <string name="Hostname">10.0.0.1</string>
+        <dword name="[SSH2] Port">2222</dword>
+        <string name="Username">admin</string>
+        <string name="Password V2">02:cf6fd9633a9e5a055cd863dcb6a322c7ed32c8bb926618581a25e4d2bcfa1e70851f790b1ffffcd218e07791612230b51dcab99aceacd3f01647b11656fa40a8</string>
+      </key>
+    </key>
+    <key name="Console">
+      <string name="Protocol Name">Serial</string>
+      <string name="Com Port">COM4</string>
+      <dword name="Baud Rate">115200</dword>
+    </key>
+  </key>
+</VanDyke>

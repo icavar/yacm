@@ -1,0 +1,10 @@
+# Every change is reviewed by the maintainer; these paths get the closest look.
+*                       @icavar
+/.github/               @icavar
+/build/                 @icavar
+/go.mod                 @icavar
+/go.sum                 @icavar
+/frontend/package.json  @icavar
+/frontend/package-lock.json @icavar
+/internal/vault/        @icavar
+/tools/                 @icavar

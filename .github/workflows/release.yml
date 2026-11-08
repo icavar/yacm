@@ -1,0 +1,220 @@
+name: Release
+
+# A release from the browser: Actions > Release > Run workflow on main with
+# the version (v0.8.10) builds all packages and prepares a draft GitHub
+# release on that commit; Publish on the Releases page then creates the tag.
+# The tag starts this workflow again, which sees the release and stops.
+# Run workflow with the version empty builds the packages without a release
+# (download them from the run's Artifacts section), e.g. a .dmg for testers.
+# A tag pushed from a computer still works as before: packages and a draft.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. v0.9.0 or v0.9.0-rc.1 (must match core/version.go). Empty: packages only, no release.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: What to build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write   # to see draft releases
+    outputs:
+      build: ${{ steps.plan.outputs.build }}
+      release: ${{ steps.plan.outputs.release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          INPUT: ${{ inputs.version }}
+        run: |
+          if [ "$EVENT" = push ]; then TAG="$GITHUB_REF_NAME"; else TAG=$(printf '%s' "$INPUT" | tr -d '[:space:]'); fi
+          if [ -z "$TAG" ]; then
+            echo "Packages only, no release"
+            echo "build=true" >> "$GITHUB_OUTPUT"; echo "release=" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          case "$TAG" in v[0-9]*) ;; *) TAG="v$TAG" ;; esac
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$'; then
+            echo "::error::$TAG is not a version like v0.9.0 or v0.9.0-rc.1"; exit 1
+          fi
+          V=$(sed -n 's/^[[:space:]]*appVersion = "\(.*\)"/\1/p' core/version.go)
+          if [ "v$V" != "$TAG" ]; then
+            echo "::error::$TAG does not match appVersion $V in core/version.go on $GITHUB_REF_NAME"; exit 1
+          fi
+          # A release (published or draft) for this version already exists:
+          # a tag from Publish, or a tag pushed after a release from the browser.
+          if gh api "repos/$GITHUB_REPOSITORY/releases" --paginate --jq '.[].tag_name' | grep -qx "$TAG"; then
+            if [ "$EVENT" = push ]; then
+              echo "::notice::Release $TAG already exists: nothing to build"
+              echo "build=false" >> "$GITHUB_OUTPUT"; echo "release=" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            echo "::error::Release $TAG already exists: delete its draft on the Releases page to build it again"; exit 1
+          fi
+          if [ "$EVENT" != push ] && git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "::error::Tag $TAG already exists without a release: push it again or delete it"; exit 1
+          fi
+          echo "Release $TAG from $GITHUB_SHA"
+          echo "build=true" >> "$GITHUB_OUTPUT"; echo "release=$TAG" >> "$GITHUB_OUTPUT"
+
+  windows-linux:
+    name: Windows and Linux packages
+    needs: plan
+    if: needs.plan.outputs.build == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Linux libraries (WebKitGTK)
+        run: bash build/ci-apt.sh
+      - name: Build packages
+        run: bash build/package.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: yacm-windows-linux
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          retention-days: 30
+
+  macos:
+    name: macOS disk image and demo
+    needs: plan
+    if: needs.plan.outputs.build == 'true'
+    # The Apple signing secrets live in the environment "release", which
+    # only the maintainer can approve (Settings > Environments).
+    environment: release
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      # With the Developer ID secrets the app is signed and notarised; without
+      # them (a fork, say) it is signed ad hoc as before.
+      - name: Developer ID certificate and notarisation key
+        id: signing
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          if [ -z "$MACOS_CERT_P12" ]; then echo "No Developer ID secrets: signing ad hoc"; exit 0; fi
+          KC="$RUNNER_TEMP/signing.keychain-db"
+          KCPW=$(openssl rand -hex 24)
+          printf '%s' "$MACOS_CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KCPW" "$KC"
+          security set-keychain-settings -lut 21600 "$KC"
+          security unlock-keychain -p "$KCPW" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KCPW" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          rm -f "$RUNNER_TEMP/cert.p12"
+          ID=$(security find-identity -v -p codesigning "$KC" | sed -n 's/.*"\(Developer ID Application:[^"]*\)".*/\1/p' | head -1)
+          if [ -z "$ID" ]; then echo "::error::No Developer ID Application identity in MACOS_CERT_P12"; exit 1; fi
+          echo "identity=$ID" >> "$GITHUB_OUTPUT"
+          if [ -n "$APPLE_API_KEY_P8" ]; then
+            printf '%s\n' "$APPLE_API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+            echo "key=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build YACM.app and .dmg
+        env:
+          MACOS_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
+          APPLE_API_KEY_PATH: ${{ steps.signing.outputs.key }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+        run: sh build/darwin/build-macos.sh
+      - name: Remove the signing keychain and key
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/AuthKey.p8"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: yacm-macos
+          path: |
+            dist-macos/*.dmg
+            dist-macos/*.zip
+          retention-days: 30
+
+  publish:
+    name: Draft GitHub release
+    if: needs.plan.outputs.release != ''
+    needs: [plan, windows-linux, macos]
+    environment: release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write     # build provenance (public repository)
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: out
+          merge-multiple: true
+      # Software bill of materials: the Go modules and npm packages in the
+      # build (go.mod / go.sum and frontend/package-lock.json), SPDX JSON.
+      - name: SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: spdx-json
+          output-file: out/yacm-${{ needs.plan.outputs.release }}-sbom.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Checksums
+        run: cd out && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
+      # Build provenance (SLSA) for every file: who built it, from which
+      # commit and workflow. GitHub offers attestations for public
+      # repositories (private ones need GitHub Enterprise).
+      - name: Build provenance
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: out/*
+      - name: SBOM attestation
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: 'out/*.zip, out/*.tar.gz, out/*.dmg'
+          sbom-path: out/yacm-${{ needs.plan.outputs.release }}-sbom.spdx.json
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.plan.outputs.release }}
+        run: |
+          node build/release-notes.mjs "$TAG" > "$RUNNER_TEMP/notes.md"
+          # --target: the tag is created on this commit when the draft is
+          # published (a tag that already exists keeps its commit).
+          # A release candidate (v0.9.0-rc.1) is marked as a pre-release.
+          PRE=""; case "$TAG" in *-rc.*) PRE="--prerelease" ;; esac
+          gh release create "$TAG" out/* --draft $PRE --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "YACM ${TAG#v}" --notes-file "$RUNNER_TEMP/notes.md"

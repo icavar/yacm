@@ -1,0 +1,219 @@
+name: CI
+
+# A push tests on Linux only; Windows and macOS run at night when main
+# changed that day, on demand (before a release) and for pull requests, which
+# keeps runs short and the minutes low in a private copy (macOS counts ten
+# times, Windows twice). Documentation-only changes run nothing.
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**']
+  pull_request:
+    paths-ignore: ['**.md', 'docs/**']
+  schedule:
+    - cron: '41 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # At night: did main change (more than documentation) in the last day?
+  changed:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    outputs:
+      code: ${{ steps.log.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 200
+      - id: log
+        run: |
+          n=$(git log --since='25 hours ago' --oneline -- . ':(exclude)*.md' ':(exclude)docs' | wc -l)
+          echo "$n commits in the last day"
+          echo "code=$([ "$n" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test (${{ matrix.os }})
+    needs: changed
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.changed.outputs.code == 'true') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # push: Linux; night: Windows and macOS; on demand and PRs: all three.
+        os: ${{ fromJSON(github.event_name == 'push' && '["ubuntu-24.04"]' || github.event_name == 'schedule' && '["windows-latest","macos-latest"]' || '["ubuntu-24.04","windows-latest","macos-latest"]') }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: macOS build flags
+        if: runner.os == 'macOS'
+        run: |
+          echo "CGO_CFLAGS=-mmacosx-version-min=13.0" >> "$GITHUB_ENV"
+          echo "CGO_LDFLAGS=-framework UniformTypeIdentifiers -mmacosx-version-min=13.0" >> "$GITHUB_ENV"
+
+      - name: Frontend
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: gofmt
+        if: runner.os == 'Linux'
+        run: test -z "$(gofmt -l . | tee /dev/stderr)"
+
+      - name: go vet
+        run: go vet ./...
+
+      # Failures are also written as an annotation, so they can be read from
+      # the run summary and through the API, not only from the full log.
+      - name: Tests
+        shell: bash
+        run: |
+          flags=""
+          # Linux: race detector and a coverage profile for the summary.
+          if [ "$RUNNER_OS" = "Linux" ]; then flags="-race -coverpkg=./... -coverprofile=coverage.out"; fi
+          set -o pipefail
+          if ! go test $flags ./... 2>&1 | tee test-output.txt; then
+            grep -E -B2 -A12 '^(--- FAIL|FAIL|panic:|# )' test-output.txt | head -c 30000 > failures.txt || true
+            msg=$(sed 's/%/%25/g; s/\r//g' failures.txt | awk '{printf "%s%%0A", $0}')
+            echo "::error title=Test failures on $RUNNER_OS::$msg"
+            exit 1
+          fi
+
+      - name: Coverage
+        if: runner.os == 'Linux'
+        run: bash build/coverage.sh coverage.out
+
+  checks:
+    name: Security checks and short fuzzing
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Frontend
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: govulncheck (known vulnerabilities in Go code and modules)
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          "$(go env GOPATH)/bin/govulncheck" ./...
+
+      - name: npm audit (frontend dependencies)
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=high
+
+      # Dependencies stay permissively licensed (no GPL, LGPL or AGPL), so
+      # adding one never changes the terms YACM can be distributed under.
+      - name: Dependency licences (Go modules of all release builds)
+        run: go run ./tools/licensecheck
+
+      - name: Dependency licences (frontend, shipped packages only)
+        working-directory: frontend
+        run: npx --yes license-checker-rseidelsohn@4 --production --excludePrivatePackages --summary --onlyAllow "MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0;0BSD;OFL-1.1;CC0-1.0;Unlicense;Zlib"
+
+      - name: Fuzz each parser for 15 s
+        run: |
+          set -o pipefail
+          bash build/fuzz.sh 15s 2>&1 | grep -v '^fuzz: elapsed'
+
+  ui:
+    name: UI tests (Playwright)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build the frontend and install Chromium
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+          npx playwright install --with-deps chromium
+
+      - name: JavaScript type check
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: UI tests
+        working-directory: frontend
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: ui-test-results
+          path: frontend/test-results/
+          retention-days: 7
+
+  desktop:
+    name: Desktop builds compile
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # The Ubuntu package mirror is sometimes very slow; each attempt is
+      # capped so one stuck download does not burn the whole job.
+      - name: Linux libraries (WebKitGTK)
+        run: bash build/ci-apt.sh
+
+      - name: Frontend
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Build Linux and Windows desktop binaries
+        run: |
+          go build -tags desktop,production,webkit2_41 -o /dev/null .
+          GOOS=windows GOARCH=amd64 go build -tags desktop,production -o /dev/null .
+          GOOS=windows GOARCH=arm64 go build -tags desktop,production -o /dev/null .

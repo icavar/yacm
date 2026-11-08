@@ -1,0 +1,25 @@
+# dependencies and build output
+frontend/node_modules/
+frontend/dist/
+/dist/
+/dist-macos/
+
+# binaries built in the project folder
+/yacm
+/yacm-linux
+/YACM
+/*.exe
+/most
+/Most.exe
+
+*.log
+.DS_Store
+
+# local Go workspace (offline build environments)
+go.work
+go.work.sum
+
+# UI test output
+frontend/test-results/
+frontend/playwright-report/
+/yacm-demo-device
