@@ -5,10 +5,11 @@
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/icavar/yacm/badge)](https://scorecard.dev/viewer/?uri=github.com/icavar/yacm)
 [![License: GPL v3+](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
-A free, open-source SSH, telnet and serial console manager for network
-engineers, built for teams that look after hundreds or thousands of devices.
-One program for the newest and the oldest gear, on Windows, macOS and Linux.
-Website: [yacm.app](https://yacm.app).
+**One connection manager for all your devices. Free and open source.**
+
+YACM (Yet Another Connection Manager) keeps your SSH, telnet and serial
+sessions in one place, whether you look after ten devices or a team's
+thousands. For Windows, macOS and Linux. Website: [yacm.app](https://yacm.app).
 
 ![YACM with a session tree, a team library and a Cisco IOS XE session](docs/images/yacm.png)
 
