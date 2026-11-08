@@ -11,6 +11,11 @@ updates:
     groups:
       go-modules:
         patterns: ["*"]
+    ignore:
+      # Wails moves to a new version only with full testing on all three
+      # systems (planned after 1.0); its newer releases also need more of
+      # the go-toast stub in third_party.
+      - dependency-name: github.com/wailsapp/wails/v2
   - package-ecosystem: npm
     directory: /frontend
     schedule:
@@ -41,3 +46,8 @@ updates:
     # usually found and withdrawn within days.
     cooldown:
       default-days: 7
+    ignore:
+      # Stay on the Ubuntu LTS release the lab is built for; only the
+      # image digest is kept current.
+      - dependency-name: ubuntu
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
