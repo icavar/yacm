@@ -68,8 +68,9 @@ Get the latest version from [Releases](https://github.com/icavar/yacm/releases):
 
 - **Windows** (10 and 11): unpack `yacm-*-windows-x64.zip` (most PCs) or
   `yacm-*-windows-arm64.zip` (Windows on ARM) and start `YACM.exe`. No
-  installation and no administrator rights are needed. Until the Windows builds are signed, SmartScreen may
-  ask: *More info > Run anyway*.
+  installation and no administrator rights are needed. Until the Windows
+  builds are signed (see the [code signing policy](docs/code-signing-policy.md)),
+  SmartScreen may ask: *More info > Run anyway*.
 - **macOS** (13 or newer, Apple silicon and Intel): open `YACM-*-macos.dmg`
   and drag YACM to Applications. The app is signed and notarised.
 - **Linux** (x64): unpack `yacm-*-linux-amd64.tar.gz` and start `./yacm`. It
@@ -79,6 +80,8 @@ Get the latest version from [Releases](https://github.com/icavar/yacm/releases):
 Every release has SHA-256 checksums, a software bill of materials and a
 build provenance attestation for each file
 (`gh attestation verify <file> --repo icavar/yacm`).
+[Code signing policy](docs/code-signing-policy.md): who builds, signs and
+approves releases, and what YACM sends over the network.
 
 **First steps**: YACM asks for a master password for its vault, then offers
 to import your sessions or add your team's library. To try it without
@@ -170,6 +173,8 @@ hardware, get the separate demo download for your system
 - [Security and compliance](docs/security-compliance.md): data, controls,
   release process, NIS2, ISO 27001, PCI DSS and the CRA.
 - [Developing YACM](docs/development.md): building from source and the tests.
+- [Code signing policy](docs/code-signing-policy.md): signing, team roles
+  and privacy.
 
 ## Contributing
 

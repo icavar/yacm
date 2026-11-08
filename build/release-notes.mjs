@@ -31,5 +31,5 @@ console.log([
   '',
   'To try YACM without network devices: `yacm-*-demo-windows.zip`, `yacm-*-demo-macos.zip` or `yacm-*-demo-linux-amd64.tar.gz` hold a pretend router that runs on your computer and example sessions for it. YACM itself does not need them.',
   '',
-  '`SHA256SUMS.txt` has the checksums, `*.spdx.json` the software bill of materials. Each file has a build provenance attestation (`*-provenance.intoto.jsonl`): `gh attestation verify <file> --repo icavar/yacm`.',
+  '`SHA256SUMS.txt` has the checksums, `*.spdx.json` the software bill of materials. Each file has a build provenance attestation (`*-provenance.intoto.jsonl`): `gh attestation verify <file> --repo icavar/yacm`. [Code signing policy](https://github.com/icavar/yacm/blob/main/docs/code-signing-policy.md).',
 ].join('\n'));
