@@ -256,8 +256,8 @@ class Tab {
         if (e.metaKey) return false; // other Cmd keys never go to the device
       }
       if (paneMoveKey(e)) return false; // handled by globalKeys
-      if (e.shiftKey && e.key === 'Insert') { this.pasteFromClipboard(); return false; }
-      if (e.ctrlKey && e.key === 'Tab') return false;
+      if (e.shiftKey && e.key === 'Insert') { this.nativePasteUntil = Date.now() + 500; this.pasteFromClipboard(); return false; }
+      if (e.ctrlKey && (e.key === 'Tab' || e.code === 'Tab')) return false;
       if (pageScroll(t, e)) return false;
       return true;
     });
@@ -1573,7 +1573,7 @@ function globalKeys(e) {
     return;
   }
   const k = e.key.toLowerCase();
-  if (e.ctrlKey && e.key === 'Tab' && order.length) {
+  if (e.ctrlKey && (e.key === 'Tab' || e.code === 'Tab') && order.length) {
     e.preventDefault();
     const i = order.indexOf(active);
     activate(order[(i + (e.shiftKey ? -1 : 1) + order.length) % order.length]);

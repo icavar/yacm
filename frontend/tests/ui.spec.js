@@ -1147,3 +1147,28 @@ test('About shows the notices, the licence and terms, support and a manual updat
   await expect(page.locator('#toasts')).toContainText('is the newest version');
   expect(errors).toEqual([]);
 });
+
+test('Shift+Insert pastes once, and Ctrl+Shift+Tab goes to the previous tab also on Linux', async ({ page }) => {
+  const errors = await open(page);
+  const ids = await connectTabs(page, ['core-sw1', 'core-sw2']);
+  await page.evaluate(() => { window.__clipboard = 'show version'; });
+  await page.locator('.term:not([hidden]) .term-body').click();
+  const writes = async () => (await calls(page, 'Write')).filter(c => c.args[0] === ids[1]).map(c => c.args[1]).join('');
+  // The webview pastes Shift+Insert by itself as well: that paste is skipped.
+  await page.keyboard.press('Shift+Insert');
+  await page.evaluate(() => {
+    const ev = new Event('paste', { bubbles: true, cancelable: true });
+    ev.clipboardData = { getData: () => 'show version' };
+    document.querySelector('.term:not([hidden]) .xterm-helper-textarea').dispatchEvent(ev);
+  });
+  await expect.poll(writes).toContain('show version');
+  await page.waitForTimeout(300);
+  expect((await writes()).split('show version').length - 1).toBe(1);
+  // WebKitGTK reports Shift+Tab as ISO_Left_Tab.
+  const active = () => page.locator('.tab.active').innerText();
+  expect(await active()).toContain('core-sw2');
+  await page.evaluate(() => document.querySelector('.term:not([hidden]) .xterm-helper-textarea').dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'ISO_Left_Tab', code: 'Tab', ctrlKey: true, shiftKey: true, bubbles: true, cancelable: true })));
+  await expect.poll(active).toContain('core-sw1');
+  expect(errors).toEqual([]);
+});
