@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/icavar/yacm/internal/store"
+	"github.com/icavar/yacm/internal/vault"
 )
 
 func TestBackupAndRestore(t *testing.T) {
@@ -51,5 +52,40 @@ func TestBackupAndRestore(t *testing.T) {
 	}
 	if a.ListBackups()[0].Reason != "before restore" {
 		t.Fatal("current state not saved before the restore")
+	}
+}
+
+// After a change of the master password, the vault copies in the backups
+// open with the new password only.
+func TestBackupsRekeyedWithNewPassword(t *testing.T) {
+	a := newTestApp(t)
+	if err := a.vault.Set("pw:x", "secret"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := a.store.Upsert(&store.Node{Name: "r1", Session: &store.Session{Protocol: store.ProtoSSH, Host: "10.0.0.1"}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := a.BackupNow(); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.ChangeMasterPassword("test-master-pw", "new-master-pw-2026"); err != nil {
+		t.Fatal(err)
+	}
+	a.rekeyWG.Wait()
+	copies := a.backups.VaultCopies()
+	if len(copies) < 2 {
+		t.Fatalf("vault copies: %v", copies)
+	}
+	for _, p := range copies {
+		if vault.New(p).Unlock("test-master-pw") == nil {
+			t.Fatalf("%s still opens with the old password", p)
+		}
+		v := vault.New(p)
+		if err := v.Unlock("new-master-pw-2026"); err != nil {
+			t.Fatalf("%s: %v", p, err)
+		}
+		if got, _ := v.Get("pw:x"); got != "secret" {
+			t.Fatalf("%s: secret %q", p, got)
+		}
 	}
 }

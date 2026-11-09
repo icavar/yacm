@@ -390,6 +390,43 @@ func TestTFTPOnePort(t *testing.T) {
 	}
 }
 
+// Requests beyond the limit of transfers at the same time are refused.
+func TestTFTPTooManyTransfers(t *testing.T) {
+	defer func(n int) { tftpMaxTransfers = n }(tftpMaxTransfers)
+	tftpMaxTransfers = 1
+	m, _, dir := newManager(t)
+	os.WriteFile(filepath.Join(dir, "img.bin"), data(200000), 0o644)
+	st, err := m.Start(Config{Kind: "tftp", Folder: dir, Bind: "127.0.0.1", Port: freeUDP(t)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	srv := &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1), Port: st.Port}
+	ask := func() (*net.UDPConn, uint16) {
+		c, err := net.ListenUDP("udp", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		c.WriteToUDP(append([]byte{0, opRRQ}, "img.bin\x00octet\x00"...), srv)
+		c.SetReadDeadline(time.Now().Add(5 * time.Second))
+		buf := make([]byte, 1024)
+		if _, _, err := c.ReadFromUDP(buf); err != nil {
+			t.Fatal(err)
+		}
+		return c, binary.BigEndian.Uint16(buf)
+	}
+	first, op := ask()
+	defer first.Close()
+	if op != opDATA {
+		t.Fatalf("first transfer: op %d", op)
+	}
+	second, op := ask()
+	defer second.Close()
+	if op != opERROR {
+		t.Fatalf("second transfer: op %d, want an error", op)
+	}
+	first.WriteToUDP([]byte{0, opERROR, 0, 0, 0}, srv)
+}
+
 // Cisco IOS asks for a file and stops right away before the real copy:
 // that is a check, not an error.
 func TestTFTPCheckIsNotAnError(t *testing.T) {

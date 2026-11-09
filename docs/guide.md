@@ -360,7 +360,9 @@ vault (`vault.json`), trusted host keys (`known_hosts`) and session logs
   changing the master password. The newest 10 and one from each of the last
   14 days are kept. Settings > Data and backups > *Backups* lists them;
   *Restore* saves the current state first, puts the backup back and restarts
-  YACM.
+  YACM. After a change of the master password the vault copies in the
+  backups are encrypted with the new one, so the old password opens none of
+  them.
 - **Export and import** in YACM's own `.yacm` format, for backups, moving to
   another computer or sharing with colleagues; passwords only under a separate
   export password ([format](import-export.md#the-yacm-export-format)).
@@ -433,9 +435,9 @@ reported as described in [SECURITY.md](../SECURITY.md).
 
 ## Trying it without hardware
 
-Each release has a separate demo download (`yacm-*-demo-windows.zip`,
-`yacm-*-demo-macos.zip`, `yacm-*-demo-linux-amd64.tar.gz`; YACM itself does
-not need it) with `yacm-demo-device` and `demo.yacm` (export password
+Each release has a separate demo download (`yacm-demo-device-*-windows.zip`,
+`yacm-demo-device-*-macos.zip`, `yacm-demo-device-*-linux-amd64.tar.gz`;
+YACM itself does not need it) with `yacm-demo-device` and `demo.yacm` (export password
 `demo-export-pw`): example sessions with credential
 profiles, a bastion, a group with defaults and login automation, all
 pointing at the demo device.

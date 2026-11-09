@@ -101,6 +101,7 @@ type App struct {
 	teamDiffs    []TeamDiff     // library changes not shown yet
 	ownPublish   map[string]int // library path -> revision you published (under teamMu)
 	snapMu       sync.Mutex
+	rekeyWG      sync.WaitGroup              // vault copies in the backups being re-encrypted
 	snapLast     map[string]time.Time        // last event backup per reason                 // open-tabs.json is final for this run (see opentabs.go)
 	restart      func(extra ...string) error // relaunch; replaced in tests
 

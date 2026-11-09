@@ -40,6 +40,10 @@ const (
 var (
 	tftpTimeout = 3 * time.Second
 	tftpRetries = 6
+	// tftpMaxTransfers limits transfers at the same time, so a flood of
+	// requests (UDP source addresses are easy to forge) cannot use up
+	// memory and open files.
+	tftpMaxTransfers = 32
 )
 
 type tftpRequest struct {
@@ -114,6 +118,7 @@ type TFTP struct {
 	quit   chan struct{}
 	mu     sync.Mutex
 	active map[string]chan []byte // device address -> its transfer's packets
+	max    int                    // transfers at the same time
 }
 
 func startTFTP(cfg Config) (*TFTP, error) {
@@ -126,7 +131,7 @@ func startTFTP(cfg Config) (*TFTP, error) {
 	if err != nil {
 		return nil, listenError(err, cfg.Port)
 	}
-	s := &TFTP{cfg: cfg, conn: c, quit: make(chan struct{}), active: map[string]chan []byte{}}
+	s := &TFTP{cfg: cfg, conn: c, quit: make(chan struct{}), active: map[string]chan []byte{}, max: tftpMaxTransfers}
 	s.wg.Add(1)
 	go s.serve()
 	return s, nil
@@ -174,8 +179,16 @@ func (s *TFTP) serve() {
 		}
 		in = make(chan []byte, 64)
 		s.mu.Lock()
-		s.active[key] = in
+		full := len(s.active) >= s.max
+		if !full {
+			s.active[key] = in
+		}
 		s.mu.Unlock()
+		if full {
+			_, _ = s.conn.WriteToUDP(errorPacket(0, "too many transfers at once, try again later"), from)
+			s.cfg.emit(Event{Kind: "tftp", Remote: from.IP.String(), File: req.file, Upload: req.op == opWRQ, State: "error", Error: "refused: too many transfers at once"})
+			continue
+		}
 		s.wg.Add(1)
 		go func() {
 			defer s.wg.Done()

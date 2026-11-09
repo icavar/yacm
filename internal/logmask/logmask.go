@@ -19,9 +19,21 @@ const Mask = "*****"
 // maxLine limits how much of an unfinished line is held back.
 const maxLine = 8 << 10
 
-// rule replaces the capture groups of re with Mask.
+// rule replaces the capture groups of re with Mask, except values keep
+// says are not secrets.
 type rule struct {
-	re *regexp.Regexp
+	re   *regexp.Regexp
+	keep func(string) bool
+}
+
+// number is true for a value of digits only (a key ID, an encryption type).
+func number(s string) bool {
+	for _, c := range s {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return s != ""
 }
 
 // The patterns cover Cisco IOS / IOS XE / IOS XR / NX-OS / ASA, Junos,
@@ -30,29 +42,36 @@ type rule struct {
 var rules = []rule{
 	// enable secret 9 $9$..., username x privilege 15 secret 5 $1$...,
 	// neighbor 192.0.2.1 password 7 0822..., ppp chap password x, ...
-	{regexp.MustCompile(`(?i)\b(?:secret|password)\s+(?:(?:0|4|5|6|7|8|9|sha512|sha256|encrypted|hash|cleartext)\s+)?("[^"]*"|\S+)`)},
+	{regexp.MustCompile(`(?i)\b(?:secret|password)\s+(?:(?:0|4|5|6|7|8|9|sha512|sha256|encrypted|hash|cleartext)\s+)?("[^"]*"|\S+)`), nil},
 	// snmp-server community public RO
-	{regexp.MustCompile(`(?i)\bsnmp-server\s+community\s+(\S+)`)},
+	{regexp.MustCompile(`(?i)\bsnmp-server\s+community\s+(\S+)`), nil},
+	// snmp-server host 192.0.2.9 traps version 2c public (IOS, NX-OS, EOS)
+	{regexp.MustCompile(`(?i)\bsnmp-server\s+host\s+\S+\s+(?:(?:informs|traps|vrf\s+\S+)\s+)*(?:version\s+(?:1|2c|3)\s+(?:(?:auth|noauth|priv)\s+)?)?(\S+)`), nil},
 	// snmp-server user u g auth md5 0x... priv aes-128 0x... (NX-OS, IOS v3)
-	{regexp.MustCompile(`(?i)\bauth\s+(?:md5|sha\S*)\s+(\S+)`)},
-	{regexp.MustCompile(`(?i)\bpriv\s+(?:(?:aes(?:[-\s]?\d+)?|3?des)\s+)?(\S+)`)},
+	{regexp.MustCompile(`(?i)\bauth\s+(?:md5|sha\S*)\s+(\S+)`), nil},
+	{regexp.MustCompile(`(?i)\bpriv\s+(?:(?:aes(?:[-\s]?\d+)?|3?des)\s+)?(\S+)`), nil},
 	// tacacs-server key 7 ..., radius-server key ..., " key 7 ..." in a server block
-	{regexp.MustCompile(`(?i)\b(?:tacacs-server|radius-server)\s+(?:host\s+\S+\s+)?key\s+(?:[0-9]\s+)?(\S+)`)},
-	{regexp.MustCompile(`(?i)^\s*(?:server-)?key\s+[0-9]\s+(\S+)`)},
+	{regexp.MustCompile(`(?i)\b(?:tacacs-server|radius-server)\s+(?:host\s+\S+\s+)?key\s+(?:[0-9]\s+)?(\S+)`), nil},
+	{regexp.MustCompile(`(?i)^\s*(?:server-)?key\s+[0-9]\s+(\S+)`), nil},
+	// " key MySecret" without a type in a server block; "  key 1" in a key
+	// chain is a key ID and stays.
+	{regexp.MustCompile(`(?i)^\s+(?:server-)?key\s+("[^"]*"|\S+)`), number},
+	// key config-key password-encrypt <master key>
+	{regexp.MustCompile(`(?i)\bkey\s+config-key\s+password-encrypt\s+(\S+)`), nil},
 	// key-string 7 ..., authentication-key 7 ..., message-digest-key 1 md5 7 ...
-	{regexp.MustCompile(`(?i)\bkey-string\s+(?:[0-9]\s+)?(\S+)`)},
-	{regexp.MustCompile(`(?i)\bauthentication-key\s+(?:\d+\s+md5\s+)?(?:[0-9]\s+)?("[^"]*"|\S+)`)},
-	{regexp.MustCompile(`(?i)\bmessage-digest-key\s+\d+\s+md5\s+(?:[0-9]\s+)?(\S+)`)},
+	{regexp.MustCompile(`(?i)\bkey-string\s+(?:[0-9]\s+)?(\S+)`), nil},
+	{regexp.MustCompile(`(?i)\bauthentication-key\s+(?:\d+\s+md5\s+)?(?:[0-9]\s+)?("[^"]*"|\S+)`), nil},
+	{regexp.MustCompile(`(?i)\bmessage-digest-key\s+\d+\s+md5\s+(?:[0-9]\s+)?(\S+)`), nil},
 	// crypto isakmp key 0 xyz address ..., pre-shared-key ..., ikev2 local-authentication pre-shared-key
-	{regexp.MustCompile(`(?i)\bcrypto\s+isakmp\s+key\s+(?:[0-9]\s+)?(\S+)`)},
-	{regexp.MustCompile(`(?i)\bpre-shared-key\s+(?:(?:local|remote|ascii-text|hexadecimal|[0-9])\s+)*("[^"]*"|\S+)`)},
+	{regexp.MustCompile(`(?i)\bcrypto\s+isakmp\s+key\s+(?:[0-9]\s+)?(\S+)`), nil},
+	{regexp.MustCompile(`(?i)\bpre-shared-key\s+(?:(?:local|remote|ascii-text|hexadecimal|[0-9])\s+)*("[^"]*"|\S+)`), nil},
 	// wpa-psk ascii 0 xyz
-	{regexp.MustCompile(`(?i)\bwpa-psk\s+(?:ascii|hex)\s+(?:[0-9]\s+)?(\S+)`)},
+	{regexp.MustCompile(`(?i)\bwpa-psk\s+(?:ascii|hex)\s+(?:[0-9]\s+)?(\S+)`), nil},
 	// Junos: encrypted-password "$6$...", any "$9$..." value
-	{regexp.MustCompile(`(?i)\bencrypted-password\s+("[^"]*"|\S+)`)},
-	{regexp.MustCompile(`("\$9\$[^"]*")`)},
+	{regexp.MustCompile(`(?i)\bencrypted-password\s+("[^"]*"|\S+)`), nil},
+	{regexp.MustCompile(`("\$9\$[^"]*")`), nil},
 	// Linux-style crypt hashes anywhere: $1$, $5$, $6$, $8$, $9$, $y$
-	{regexp.MustCompile(`(\$(?:1|5|6|8|9|y)\$[^\s"';]+)`)},
+	{regexp.MustCompile(`(\$(?:1|5|6|8|9|y)\$[^\s"';]+)`), nil},
 }
 
 var (
@@ -75,7 +94,7 @@ func Line(s string) string {
 					continue
 				}
 				val := s[m[g]:m[g+1]]
-				if val == "" || val == Mask || val == `"`+Mask+`"` {
+				if val == "" || val == Mask || val == `"`+Mask+`"` || (r.keep != nil && r.keep(val)) {
 					continue
 				}
 				b = append(b, s[last:m[g]]...)

@@ -150,6 +150,18 @@ func (m *Manager) List() []Info {
 	return out
 }
 
+// VaultCopies returns the paths of the vault files in the backups.
+func (m *Manager) VaultCopies() []string {
+	var out []string
+	for _, in := range m.List() {
+		p := filepath.Join(m.Dir(), in.ID, "vault.json")
+		if _, err := os.Stat(p); err == nil {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
 // prune keeps the newest keepRecent backups and the first one of each of the
 // last keepDays days.
 func (m *Manager) prune() {
