@@ -32,6 +32,10 @@ type Link struct {
 	redial func(ctx context.Context) (*ssh.Client, error)
 	active int  // commands running
 	serial bool // one command at a time
+	// reconnects counts new connections after the device closed one; only
+	// the first and slow ones are logged (Cisco IOS closes after every
+	// command, which is normal).
+	reconnects int
 	// OnSerial is called once when the link switches to one at a time.
 	OnSerial func()
 	// Logf receives what happens on the link (for YACM's log).
@@ -189,7 +193,14 @@ func (l *Link) reconnect(ctx context.Context, c *ssh.Client) (*ssh.Client, error
 		l.logf("reconnecting failed after %v: %v", time.Since(start).Round(time.Millisecond), err)
 		return nil, err
 	}
-	l.logf("the device closed the connection: reconnected in %v", time.Since(start).Round(time.Millisecond))
+	took := time.Since(start).Round(time.Millisecond)
+	l.reconnects++
+	switch {
+	case l.reconnects == 1:
+		l.logf("the device closes the connection after each command (usual for Cisco IOS); YACM reconnects when needed, this time in %v", took)
+	case took > 3*time.Second:
+		l.logf("reconnecting took %v", took)
+	}
 	l.c = nc
 	return nc, nil
 }

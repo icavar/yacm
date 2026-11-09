@@ -1172,3 +1172,29 @@ test('Shift+Insert pastes once, and Ctrl+Shift+Tab goes to the previous tab also
   await expect.poll(active).toContain('core-sw1');
   expect(errors).toEqual([]);
 });
+
+test('a transfer from a terminal tab goes on when the terminal session ends, with speed and time left', async ({ page }) => {
+  const errors = await open(page, { chooseFiles: ['/home/ivan/Downloads/cat9k_iosxe.17.15.06.SPA.bin'] });
+  const [tabId] = await connectTabs(page, ['core-sw1']);
+  await page.locator('#statusbar').getByRole('button', { name: 'Files ▾' }).click();
+  await page.locator('.menu').getByText('Send file…').click();
+  await page.getByRole('dialog', { name: /Send cat9k/ }).getByRole('button', { name: 'Send' }).click();
+  await expect.poll(async () => (await calls(page, 'FilesUpload')).length).toBe(1);
+  const ev = (done, state, extra = {}) => page.evaluate(e => window.__emit('xfer:progress', e), { id: 'x-up', filesId: 'f1', name: 'cat9k_iosxe.17.15.06.SPA.bin', dir: 'up', local: '/home/ivan/Downloads/cat9k_iosxe.17.15.06.SPA.bin', remote: 'flash:cat9k_iosxe.17.15.06.SPA.bin', done, total: 1300000000, state, hint: 'Slow? SCP to a network device is as fast as its SSH window allows', ...extra });
+  await ev(0, 'running');
+  await page.waitForTimeout(1500);
+  await ev(10000000, 'running');
+  await page.waitForTimeout(2000);
+  await ev(20000000, 'running');
+  const panel = page.locator('.xfer-panel');
+  await expect(panel).toContainText('/s');
+  await expect(panel).toContainText(/min left|h left/);
+  await expect(panel).toContainText('SSH window');
+  // The device logs the terminal out (exec-timeout): the transfer goes on.
+  await page.evaluate(id => window.__emit('tab:status', { tabId: id, state: 'closed' }), tabId);
+  await page.waitForTimeout(300);
+  expect((await calls(page, 'FilesClose')).length).toBe(0);
+  await ev(1300000000, 'done');
+  await expect.poll(async () => (await calls(page, 'FilesClose')).length).toBe(1);
+  expect(errors).toEqual([]);
+});

@@ -107,7 +107,13 @@ type TransferEvent struct {
 	MD5     string `json:"md5,omitempty"`
 	// Verified: "" not checked, "ok", "mismatch", "unavailable".
 	Verified string `json:"verified,omitempty"`
+	// Hint: advice shown while the transfer runs (how to make it faster).
+	Hint string `json:"hint,omitempty"`
 }
+
+// scpWindowHint is shown with large SCP uploads: on network devices their
+// speed is set by the device's SSH window and the round trip time.
+const scpWindowHint = "Slow? SCP to a network device is as fast as its SSH window allows: on Cisco IOS-XE, a larger \"ip ssh window-size\" (or \"ip ssh bulk-mode\") speeds it up."
 
 var errNoFiles = errors.New("the file connection is closed; open it again")
 
@@ -312,7 +318,7 @@ func (a *App) FilesClose(id string) {
 	a.filesMu.Lock()
 	f := a.files[id]
 	delete(a.files, id)
-	var cancels []context.CancelFunc
+	var cancels []context.CancelCauseFunc
 	for _, x := range a.xfers {
 		if x.filesID == id {
 			cancels = append(cancels, x.cancel)
@@ -320,7 +326,7 @@ func (a *App) FilesClose(id string) {
 	}
 	a.filesMu.Unlock()
 	for _, c := range cancels {
-		c()
+		c(errFilesClosed)
 	}
 	if f != nil {
 		_ = f.remote.Close()
@@ -428,8 +434,14 @@ func (a *App) FilesMD5(id, path string) (string, error) {
 
 type transferJob struct {
 	filesID string
-	cancel  context.CancelFunc
+	cancel  context.CancelCauseFunc
 }
+
+// Why a transfer was cancelled, for the log.
+var (
+	errCancelledByUser = errors.New("by the user")
+	errFilesClosed     = errors.New("because its file connection was closed")
+)
 
 func (a *App) startTransfer(f *filesConn, ev TransferEvent, work func(ctx context.Context, ev *TransferEvent, tick func(int64)) error) string {
 	return a.startJob(f.id, f.name, ev, work)
@@ -440,13 +452,13 @@ func (a *App) startTransfer(f *filesConn, ev TransferEvent, work func(ctx contex
 // session); name is the device for the log.
 func (a *App) startJob(filesID, name string, ev TransferEvent, work func(ctx context.Context, ev *TransferEvent, tick func(int64)) error) string {
 	ev.ID, ev.FilesID, ev.State = store.NewID(), filesID, "running"
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancelCause(context.Background())
 	a.filesMu.Lock()
 	a.xfers[ev.ID] = &transferJob{filesID: filesID, cancel: cancel}
 	a.filesMu.Unlock()
 	go func() {
 		defer applog.Recover("transfer "+ev.Name, nil)
-		defer cancel()
+		defer cancel(nil)
 		var mu sync.Mutex
 		last := time.Time{}
 		// A device that takes one channel at a time: the transfer waits
@@ -474,6 +486,7 @@ func (a *App) startJob(filesID, name string, ev TransferEvent, work func(ctx con
 			}
 		}
 		a.emit("xfer:progress", ev)
+		started := time.Now()
 		err := work(ctx, &ev, tick)
 		mu.Lock()
 		switch {
@@ -490,10 +503,21 @@ func (a *App) startJob(filesID, name string, ev TransferEvent, work func(ctx con
 		delete(a.xfers, ev.ID)
 		a.filesMu.Unlock()
 		what := map[string]string{"up": "upload", "down": "download", "cmd": "command output"}[ev.Dir]
+		took := time.Since(started)
+		speed := ""
+		if s := took.Seconds(); s >= 1 && final.Done > 0 {
+			speed = ", " + humanBytes(int64(float64(final.Done)/s)) + "/s"
+		}
 		if final.State == "done" {
-			applog.Infof("files %s: %s %s ↔ %s finished (%d bytes%s)", name, what, final.Remote, final.Local, final.Done, map[string]string{"ok": ", MD5 verified", "mismatch": ", MD5 MISMATCH"}[final.Verified])
+			applog.Infof("files %s: %s %s ↔ %s finished (%d bytes in %v%s%s)", name, what, final.Remote, final.Local, final.Done, took.Round(time.Second), speed, map[string]string{"ok": ", MD5 verified", "mismatch": ", MD5 MISMATCH"}[final.Verified])
 		} else {
-			applog.Warnf("files %s: %s %s ↔ %s %s %s", name, what, final.Remote, final.Local, final.State, final.Error)
+			reason := final.Error
+			if final.State == "cancelled" {
+				if c := context.Cause(ctx); c != nil && c != context.Canceled {
+					reason = c.Error()
+				}
+			}
+			applog.Warnf("files %s: %s %s ↔ %s %s %s (%d of %d bytes in %v%s)", name, what, final.Remote, final.Local, final.State, reason, final.Done, final.Total, took.Round(time.Second), speed)
 		}
 		a.emit("xfer:progress", final)
 	}()
@@ -506,7 +530,7 @@ func (a *App) TransferCancel(xferID string) {
 	x := a.xfers[xferID]
 	a.filesMu.Unlock()
 	if x != nil {
-		x.cancel()
+		x.cancel(errCancelledByUser)
 	}
 }
 
@@ -602,6 +626,9 @@ func (a *App) FilesUpload(id, localPath, remotePath string, verifyMD5 bool) (str
 		}
 	}
 	ev := TransferEvent{Name: filepath.Base(localPath), Dir: "up", Local: localPath, Remote: remotePath, Total: st.Size()}
+	if f.remote.Kind() == "scp" && st.Size() >= 64<<20 {
+		ev.Hint = scpWindowHint
+	}
 	return a.startTransfer(f, ev, func(ctx context.Context, ev *TransferEvent, tick func(int64)) error {
 		if free := f.remote.Free(ctx, remotePath); free >= 0 && free < st.Size() {
 			return fmt.Errorf("not enough space on the device: %s free, the file needs %s", humanBytes(free), humanBytes(st.Size()))

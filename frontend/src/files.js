@@ -124,6 +124,16 @@ function stateText(x) {
   }
 }
 
+// eta: the time left at the current speed, once it is worth showing.
+function eta(x) {
+  if (!x.total || x.rate <= 0 || Date.now() - x.started < 3000) return '';
+  const s = (x.total - x.done) / x.rate;
+  if (s < 5) return '';
+  if (s < 90) return ` · ${Math.round(s)} s left`;
+  if (s < 5400) return ` · ${Math.round(s / 60)} min left`;
+  return ` · ${(s / 3600).toFixed(1)} h left`;
+}
+
 // transferRow draws one transfer (in a Files tab or the floating panel).
 function transferRow(x) {
   const pct = x.total ? Math.min(100, (x.done / x.total) * 100) : x.state === 'done' ? 100 : 0;
@@ -131,14 +141,15 @@ function transferRow(x) {
   const queued = x.state === 'queued';
   const arrow = x.dir === 'up' ? '↑' : '↓';
   const detail = queued ? 'waits for the transfer before it (the device takes one at a time)' : running
-    ? `${fmtBytes(x.done)}${x.total ? ` of ${fmtBytes(x.total)}` : ''}${x.rate > 0 && x.state === 'running' ? ` · ${fmtBytes(x.rate)}/s` : ''}`
+    ? `${fmtBytes(x.done)}${x.total ? ` of ${fmtBytes(x.total)}` : ''}${x.rate > 0 && x.state === 'running' ? ` · ${fmtBytes(x.rate)}/s${eta(x)}` : ''}`
     : x.state === 'error' ? x.error : x.dir === 'up' ? `to ${x.remote}` : `to ${x.local}`;
   return h('div', { class: `xfer ${x.state}`, title: `${x.dir === 'up' ? `${x.local} → ${x.remote}` : x.dir === 'down' ? `${x.remote} → ${x.local}` : `${x.remote} → ${x.local}`}${x.md5 ? `\nMD5 ${x.md5}` : ''}` },
     h('span', { class: 'dir', text: x.dir === 'cmd' ? '⌘' : arrow, 'aria-label': x.dir === 'up' ? 'Upload' : 'Download' }),
     h('div', { class: 'what' },
       h('div', { class: 'line' }, h('span', { class: 'name', text: x.name }), h('span', { class: 'st', text: stateText(x) })),
       h('div', { class: `progress${x.state === 'verifying' ? ' indeterminate' : ''}` }, h('div', { class: 'fill', style: { width: `${pct}%` } })),
-      h('div', { class: 'detail', text: detail })),
+      h('div', { class: 'detail', text: detail }),
+      x.hint && x.state === 'running' ? h('div', { class: 'detail hint', text: x.hint }) : null),
     running
       ? h('button', { class: 'text-btn', text: 'Cancel', on: { click: () => api.TransferCancel(x.id) } })
       : x.state === 'done' && x.dir !== 'up'
@@ -189,7 +200,17 @@ function dropTabConn(tabId) {
   const p = tabConns.get(tabId);
   if (!p) return;
   tabConns.delete(tabId);
-  p.then(info => api.FilesClose(info.id)).catch(() => {});
+  p.then(info => closeWhenIdle(info.id)).catch(() => {});
+}
+
+// closeWhenIdle closes a file connection once its transfers have finished.
+// The terminal session can end while a transfer runs (the device's
+// exec-timeout, say); the transfer goes on over its own connection, or
+// over a new one when it shared the terminal's.
+function closeWhenIdle(id) {
+  const busy = () => [...transfers.values()].some(x => x.filesId === id && active(x));
+  if (!busy()) { api.FilesClose(id); return; }
+  const off = onTransfer(() => { if (!busy()) { off(); api.FilesClose(id); } });
 }
 
 // tabConn opens the file system of a terminal tab over its own SSH

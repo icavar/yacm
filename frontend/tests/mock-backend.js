@@ -90,7 +90,7 @@
     LocalParent: p => p.replace(/\/[^/]*$/, '') || '/',
     LocalJoin: (d, n) => `${d}/${n}`,
     LocalExists: () => false,
-    ChooseFiles: () => [],
+    ChooseFiles: () => cfg.chooseFiles || [],
     FileServerStatuses: () => ['tftp', 'http', 'scp'].map(k => servers[k] || { kind: k, running: false }),
     LocalAddresses: () => [{ ip: '10.1.1.5', interface: 'eth0' }],
     ChooseSaveAs: (title, dir, name) => `/home/ivan/Desktop/${name}`,

@@ -575,6 +575,7 @@ option { background: var(--bg-raised); color: var(--text); }
 .xfer.done .progress .fill { background: var(--ok); }
 .xfer.error .progress .fill, .xfer.cancelled .progress .fill { background: var(--danger); }
 .xfer.error .detail { color: var(--danger); font-family: var(--ui); white-space: normal; }
+.xfer .detail.hint { font-family: var(--ui); white-space: normal; }
 .xfer.done .st { color: var(--ok); }
 .xfer-panel { position: fixed; right: 14px; bottom: 44px; width: min(420px, calc(100vw - 28px)); max-height: 50vh; display: flex; flex-direction: column; background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-m); box-shadow: 0 10px 30px rgba(0,0,0,.4); z-index: 50; }
 .terms.split .term.files-tab .files-body { margin-top: 22px; }
