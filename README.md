@@ -86,8 +86,8 @@ approves releases, and what YACM sends over the network.
 **First steps**: YACM asks for a master password for its vault, then offers
 to import your sessions or add your team's library. To try it without
 hardware, get the separate demo download for your system
-(`yacm-*-demo-windows.zip`, `yacm-*-demo-macos.zip` or
-`yacm-*-demo-linux-amd64.tar.gz`), start the demo device and import
+(`yacm-demo-device-*-windows.zip`, `yacm-demo-device-*-macos.zip` or
+`yacm-demo-device-*-linux-amd64.tar.gz`), start the demo device and import
 `demo.yacm` (see the [user guide](docs/guide.md#trying-it-without-hardware)).
 
 ## Features

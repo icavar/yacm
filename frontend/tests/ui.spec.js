@@ -179,7 +179,7 @@ test("no What's new before 1.1, the guide on a fresh install", async ({ page }) 
   // With the demo download unpacked next to YACM it imports in one click.
   const withDemo = await page.context().newPage();
   withDemo.on('pageerror', e => errors.push(e.message));
-  await withDemo.addInitScript(c => { window.__mockConfig = c; }, { fresh: true, nodes: [], settings: { lastSeenVersion: '' }, demoFile: '/home/u/Downloads/yacm-0.9.0-demo-linux-amd64/demo.yacm' });
+  await withDemo.addInitScript(c => { window.__mockConfig = c; }, { fresh: true, nodes: [], settings: { lastSeenVersion: '' }, demoFile: '/home/u/Downloads/yacm-demo-device-0.9.1-linux-amd64/demo.yacm' });
   await withDemo.addInitScript(mock);
   await withDemo.goto('/');
   await expect(withDemo.getByRole('button', { name: 'Import the demo sessions' })).toBeVisible();

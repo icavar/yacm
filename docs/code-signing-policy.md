@@ -13,7 +13,7 @@ the Windows packages are not signed; the first release after that is.
 
 Signed files: `YACM.exe` in `yacm-*-windows-x64.zip` and
 `yacm-*-windows-arm64.zip`, and `yacm-demo-device.exe` in
-`yacm-*-demo-windows.zip`. Only files built from this repository are signed.
+`yacm-demo-device-*-windows.zip`. Only files built from this repository are signed.
 
 ## macOS
 

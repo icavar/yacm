@@ -30,6 +30,7 @@ jobs:
     outputs:
       build: ${{ steps.plan.outputs.build }}
       release: ${{ steps.plan.outputs.release }}
+      version: ${{ steps.plan.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: plan
@@ -64,7 +65,7 @@ jobs:
             echo "::error::Tag $TAG already exists without a release: push it again or delete it"; exit 1
           fi
           echo "Release $TAG from $GITHUB_SHA"
-          echo "build=true" >> "$GITHUB_OUTPUT"; echo "release=$TAG" >> "$GITHUB_OUTPUT"
+          echo "build=true" >> "$GITHUB_OUTPUT"; echo "release=$TAG" >> "$GITHUB_OUTPUT"; echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
   windows-linux:
     name: Windows and Linux packages
@@ -187,7 +188,7 @@ jobs:
         with:
           path: .
           format: spdx-json
-          output-file: out/yacm-${{ needs.plan.outputs.release }}-sbom.spdx.json
+          output-file: out/yacm-${{ needs.plan.outputs.version }}-sbom.spdx.json
           upload-artifact: false
           upload-release-assets: false
       - name: Checksums
@@ -206,7 +207,7 @@ jobs:
         uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
         with:
           subject-path: 'out/*.zip, out/*.tar.gz, out/*.dmg'
-          sbom-path: out/yacm-${{ needs.plan.outputs.release }}-sbom.spdx.json
+          sbom-path: out/yacm-${{ needs.plan.outputs.version }}-sbom.spdx.json
       # The provenance bundle also goes into the release, so it can be
       # checked offline (gh attestation verify FILE --bundle ...).
       - name: Provenance bundle as a release file

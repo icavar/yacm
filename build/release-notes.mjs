@@ -18,6 +18,9 @@ if (at >= 0) {
   for (const m of block.matchAll(/\['((?:[^'\\]|\\.)*)',\s*'((?:[^'\\]|\\.)*)'\]/g)) lines.push(`- **${unq(m[1])}**: ${unq(m[2])}`);
 }
 const rc = version.includes('-rc.');
+// Direct links to the release files: GitHub lists them in one flat list.
+const repo = process.env.GITHUB_REPOSITORY || 'icavar/yacm';
+const link = f => `[${f}](https://github.com/${repo}/releases/download/v${version}/${f})`;
 console.log([
   rc ? `Release candidate of YACM ${num}, for testing.` : `YACM ${num}.`,
   '',
@@ -25,11 +28,26 @@ console.log([
   ...(lines.length ? ['## What is new', '', ...lines, ''] : []),
   '## Downloads',
   '',
-  '- **Windows** 10 and 11: `yacm-*-windows-x64.zip` for most PCs, `yacm-*-windows-arm64.zip` for Windows on ARM',
-  '- **macOS** 13 or newer: `YACM-*-macos.dmg` (Apple silicon and Intel, signed and notarised)',
-  '- **Linux** x64: `yacm-*-linux-amd64.tar.gz` (needs WebKitGTK 4.1, as in Ubuntu 22.04 and newer)',
+  '| YACM | |',
+  '|---|---|',
+  `| **Windows** 10 and 11, x64 (most PCs) | ${link(`yacm-${version}-windows-x64.zip`)} |`,
+  `| **Windows** 10 and 11 on ARM | ${link(`yacm-${version}-windows-arm64.zip`)} |`,
+  `| **macOS** 13 or newer, Apple silicon and Intel (signed and notarised) | ${link(`YACM-${version}-macos.dmg`)} |`,
+  `| **Linux** x64 (needs WebKitGTK 4.1, as in Ubuntu 22.04 and newer) | ${link(`yacm-${version}-linux-amd64.tar.gz`)} |`,
   '',
-  'To try YACM without network devices: `yacm-*-demo-windows.zip`, `yacm-*-demo-macos.zip` or `yacm-*-demo-linux-amd64.tar.gz` hold a pretend router that runs on your computer and example sessions for it. YACM itself does not need them.',
+  '| Demo device | |',
+  '|---|---|',
+  `| Windows | ${link(`yacm-demo-device-${version}-windows.zip`)} |`,
+  `| macOS | ${link(`yacm-demo-device-${version}-macos.zip`)} |`,
+  `| Linux x64 | ${link(`yacm-demo-device-${version}-linux-amd64.tar.gz`)} |`,
   '',
-  '`SHA256SUMS.txt` has the checksums, `*.spdx.json` the software bill of materials. Each file has a build provenance attestation (`*-provenance.intoto.jsonl`): `gh attestation verify <file> --repo icavar/yacm`. [Code signing policy](https://github.com/icavar/yacm/blob/main/docs/code-signing-policy.md).',
+  'The demo device is a pretend router that runs on your computer, with example sessions for it, to try YACM without network devices. YACM itself does not need it.',
+  '',
+  '| Verification | |',
+  '|---|---|',
+  `| Checksums | ${link('SHA256SUMS.txt')} |`,
+  `| Software bill of materials (SPDX) | ${link(`yacm-${version}-sbom.spdx.json`)} |`,
+  `| Build provenance | ${link(`yacm-${version}-provenance.intoto.jsonl`)} |`,
+  '',
+  `Check a file with \`gh attestation verify <file> --repo ${repo}\`. [Code signing policy](https://github.com/${repo}/blob/main/docs/code-signing-policy.md).`,
 ].join('\n'));

@@ -25,7 +25,7 @@ go build -tags desktop,production,webkit2_41 -ldflags "-s -w" -o yacm .
 --install`), Go and Node, run `sh build/darwin/build-macos.sh`. It builds a
 universal `YACM.app` (Apple silicon and Intel, macOS 13 Ventura or newer, as
 Go requires) and packs it into `dist-macos/YACM-<version>-macos.dmg`, and
-the demo device into the separate `dist-macos/yacm-<version>-demo-macos.zip`. Built this way the
+the demo device into the separate `dist-macos/yacm-demo-device-<version>-macos.zip`. Built this way the
 app is signed ad hoc only: a copy built on your own Mac opens normally, a
 copy given to someone else has to be allowed in System Settings > Privacy &
 Security > Open Anyway. The releases are built by GitHub Actions

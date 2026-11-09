@@ -10,7 +10,7 @@
 # The result is dist-macos/YACM-<version>-macos.dmg: a universal app that
 # runs on Apple silicon and Intel Macs with macOS 13 or newer (the oldest
 # macOS the Go toolchain builds for), and the separate demo download
-# dist-macos/yacm-<version>-demo-macos.zip (the demo device and demo.yacm).
+# dist-macos/yacm-demo-device-<version>-macos.zip (the demo device and demo.yacm).
 #
 # Signing:
 #   MACOS_SIGN_IDENTITY  a "Developer ID Application: …" certificate in the
@@ -37,7 +37,7 @@ NUMVER=${VERSION%%-*} # bundle versions are numbers: 0.9.0-rc.1 -> 0.9.0
 OUT=dist-macos
 APP="$OUT/YACM.app"
 STAGE="$OUT/stage"
-DEMO="$OUT/yacm-$VERSION-demo-macos"
+DEMO="$OUT/yacm-demo-device-$VERSION-macos"
 echo "Building YACM $VERSION for macOS"
 rm -rf "$OUT"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$STAGE" "$DEMO"
@@ -103,7 +103,7 @@ sed 's/yacm-demo-device\.exe/yacm-demo-device/g; s/Start it by double-clicking; 
 	build/demo/README-DEMO.txt >"$DEMO/README-DEMO.txt"
 cp LICENSE NOTICE.md "$DEMO/"
 (cd "$DEMO" && shasum -a 256 yacm-demo-device demo.yacm >SHA256SUMS.txt)
-DEMOZIP="$OUT/yacm-$VERSION-demo-macos.zip"
+DEMOZIP="$OUT/yacm-demo-device-$VERSION-macos.zip"
 ditto -c -k --keepParent "$DEMO" "$DEMOZIP"
 
 echo "5/5 Disk image"

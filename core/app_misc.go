@@ -252,8 +252,9 @@ func (a *App) MarkVersionSeen() error {
 }
 
 // demoFile finds demo.yacm from the separate demo download: in a demo
-// folder next to the executable, or in an unpacked yacm-*-demo-* folder next
-// to it or next to YACM's own folder (both downloads unpacked in one place).
+// folder next to the executable, or in an unpacked yacm-demo-device-* (or
+// older yacm-*-demo-*) folder next to it or next to YACM's own folder (both
+// downloads unpacked in one place).
 func demoFile() string {
 	exe, err := os.Executable()
 	if err != nil {
@@ -271,6 +272,10 @@ func demoFileNear(dir string) string {
 	}
 	for _, d := range []string{dir, filepath.Dir(dir)} {
 		m, _ := filepath.Glob(filepath.Join(d, "yacm-*-demo-*", "demo.yacm"))
+		// yacm-demo-device-<version>-<os> (0.9.1 and newer) sorts after
+		// the older yacm-<version>-demo-<os>.
+		n, _ := filepath.Glob(filepath.Join(d, "yacm-demo-device-*", "demo.yacm"))
+		m = append(m, n...)
 		sort.Strings(m)
 		if len(m) > 0 {
 			return m[len(m)-1] // several versions: the last by name

@@ -112,8 +112,13 @@ func TestDemoFileNear(t *testing.T) {
 	if got := demoFileNear(app); got != sibling {
 		t.Fatalf("sibling demo: got %q, want %q", got, sibling)
 	}
+	// The newer name (0.9.1) comes after the older one.
+	newer := write(filepath.Join(root, "yacm-demo-device-0.9.1-windows", "demo.yacm"))
+	if got := demoFileNear(app); got != newer {
+		t.Fatalf("newer demo: got %q, want %q", got, newer)
+	}
 	// The demo unpacked into YACM's own folder comes first.
-	inside := write(filepath.Join(app, "yacm-0.9.0-demo-windows", "demo.yacm"))
+	inside := write(filepath.Join(app, "yacm-demo-device-0.9.1-windows", "demo.yacm"))
 	if got := demoFileNear(app); got != inside {
 		t.Fatalf("demo inside: got %q, want %q", got, inside)
 	}

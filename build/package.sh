@@ -3,8 +3,8 @@
 #   dist/yacm-<version>-windows-x64.zip        YACM.exe for x64
 #   dist/yacm-<version>-windows-arm64.zip      YACM.exe for ARM
 #   dist/yacm-<version>-linux-amd64.tar.gz     yacm
-#   dist/yacm-<version>-demo-windows.zip       the demo device and demo.yacm
-#   dist/yacm-<version>-demo-linux-amd64.tar.gz
+#   dist/yacm-demo-device-<version>-windows.zip       the demo device and demo.yacm
+#   dist/yacm-demo-device-<version>-linux-amd64.tar.gz
 # The demo is a separate download: YACM itself does not need it.
 #
 # Needs Go, Node and, for the Linux build, libgtk-3-dev and
@@ -19,8 +19,8 @@ OUT=dist
 WX=$OUT/yacm-$V-windows-x64
 WA=$OUT/yacm-$V-windows-arm64
 L=$OUT/yacm-$V-linux-amd64
-DW=$OUT/yacm-$V-demo-windows
-DL=$OUT/yacm-$V-demo-linux-amd64
+DW=$OUT/yacm-demo-device-$V-windows
+DL=$OUT/yacm-demo-device-$V-linux-amd64
 echo "Packaging YACM $V"
 rm -rf "$OUT"
 mkdir -p "$WX" "$WA" "$L" "$DW" "$DL"
@@ -55,7 +55,7 @@ for d in "$DW" "$DL"; do cp LICENSE NOTICE.md "$d/"; done
 (cd "$DL" && sha256sum yacm-demo-device demo.yacm >SHA256SUMS.txt)
 (
 	cd "$OUT"
-	for d in "yacm-$V-windows-x64" "yacm-$V-windows-arm64" "yacm-$V-demo-windows"; do zip -qr "$d.zip" "$d"; done
-	for d in "yacm-$V-linux-amd64" "yacm-$V-demo-linux-amd64"; do tar czf "$d.tar.gz" "$d"; done
+	for d in "yacm-$V-windows-x64" "yacm-$V-windows-arm64" "yacm-demo-device-$V-windows"; do zip -qr "$d.zip" "$d"; done
+	for d in "yacm-$V-linux-amd64" "yacm-demo-device-$V-linux-amd64"; do tar czf "$d.tar.gz" "$d"; done
 )
 ls -la "$OUT"
