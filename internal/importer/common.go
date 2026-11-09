@@ -64,6 +64,10 @@ type Options struct {
 	// Cancelled, when set, is polled during slow steps; returning true
 	// stops the import with ErrCancelled.
 	Cancelled func() bool
+	// Profiles are the credential profiles YACM already has, by lower-case
+	// name: a session that names one (SecureCRT "Credential Title") whose
+	// set is not in the imported files uses it.
+	Profiles map[string]string
 }
 
 // ErrCancelled is returned when Options.Cancelled asked to stop.
@@ -207,7 +211,7 @@ func (b *builder) add(path []string, n *store.Node) bool {
 		n.ID = store.NewID()
 	}
 	if err := store.Validate(n); err != nil {
-		b.skip(n.Name, "", err.Error())
+		b.skip(strings.Join(append(append([]string{}, path...), n.Name), "/"), "", err.Error())
 		return false
 	}
 	n.ParentID = b.group(path)

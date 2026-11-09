@@ -30,8 +30,12 @@ type ForeignRequest struct {
 func (a *App) foreignOptions(password string) importer.Options {
 	user, sid := importer.CurrentWindowsAccount()
 	a.importStop.Store(false)
+	profiles := map[string]string{}
+	for _, c := range a.store.Credentials() {
+		profiles[strings.ToLower(c.Name)] = c.ID
+	}
 	return importer.Options{Password: password, WinUser: user, WinSID: sid,
-		Progress: a.importProgress(), Cancelled: a.importStop.Load}
+		Progress: a.importProgress(), Cancelled: a.importStop.Load, Profiles: profiles}
 }
 
 // ImportProgress is sent while a slow import step runs.

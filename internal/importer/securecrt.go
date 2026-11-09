@@ -207,10 +207,13 @@ func importSecureCRTDir(dir, parentID string, opts Options) (*Result, error) {
 			break
 		}
 	}
+	// Credential sets and firewalls sit next to the Sessions folder, also
+	// when only a folder inside it was chosen.
 	var creds []*scrtSession
-	if strings.EqualFold(filepath.Base(dir), "Sessions") {
-		b.scrtFW = readSCRTFirewalls(filepath.Join(filepath.Dir(dir), "Firewalls"))
-		creds = readSCRTCredentials(b, filepath.Join(filepath.Dir(dir), "Credentials"))
+	sroot := scrtSessionsRoot(dir)
+	if sroot != "" {
+		b.scrtFW = readSCRTFirewalls(filepath.Join(filepath.Dir(sroot), "Firewalls"))
+		creds = readSCRTCredentials(b, filepath.Join(filepath.Dir(sroot), "Credentials"))
 	}
 	var sessions []*scrtSession
 	err := filepath.WalkDir(dir, func(p string, d fs.DirEntry, err error) error {
@@ -223,8 +226,16 @@ func importSecureCRTDir(dir, parentID string, opts Options) (*Result, error) {
 		}
 		rel, _ := filepath.Rel(dir, p)
 		rel = filepath.ToSlash(strings.TrimSuffix(rel, filepath.Ext(rel)))
-		if strings.EqualFold(rel, "Default") || strings.EqualFold(rel, "Default_LocalShell") {
-			return nil // the templates every new session starts from
+		// The templates new sessions start from, in the Sessions folder
+		// itself (a session named Default in a folder is a real one).
+		top := rel
+		if sroot != "" {
+			if r, err := filepath.Rel(sroot, p); err == nil {
+				top = filepath.ToSlash(strings.TrimSuffix(r, filepath.Ext(r)))
+			}
+		}
+		if strings.EqualFold(top, "Default") || strings.EqualFold(top, "Default_LocalShell") || strings.EqualFold(top, "Default_RDP") {
+			return nil
 		}
 		data, err := readFile(p)
 		if err != nil {
@@ -248,6 +259,20 @@ func importSecureCRTDir(dir, parentID string, opts Options) (*Result, error) {
 	addSCRTCredentials(b, creds, opts)
 	addSCRTSessions(b, sessions, opts)
 	return b.done(), nil
+}
+
+// scrtSessionsRoot returns dir or the folder above it named Sessions (the
+// SecureCRT Config/Sessions folder), or "".
+func scrtSessionsRoot(dir string) string {
+	for d, i := filepath.Clean(dir), 0; i < 32; d, i = filepath.Dir(d), i+1 {
+		if strings.EqualFold(filepath.Base(d), "Sessions") {
+			return d
+		}
+		if filepath.Dir(d) == d {
+			break
+		}
+	}
+	return ""
 }
 
 // readSCRTCredentials reads SecureCRT's credential sets
@@ -304,18 +329,30 @@ func addSCRTCredentials(b *builder, creds []*scrtSession, opts Options) {
 
 // scrtCred is a SecureCRT credential set imported as a credential profile.
 type scrtCred struct {
-	c  *store.Credential
-	pw string
+	c        *store.Credential
+	pw       string
+	existing bool // a profile YACM already has: its user name is not known here
 }
 
 // scrtCredential returns the credential set a session uses ("Credential
 // Title"), or nil when it uses its own login.
-func (b *builder) scrtCredential(sess *scrtSession) *scrtCred {
+func (b *builder) scrtCredential(sess *scrtSession, opts Options) *scrtCred {
 	t := strings.TrimSpace(sess.str("Credential Title"))
 	if t == "" {
 		return nil
 	}
 	if c := b.scrtCreds[strings.ToLower(t)]; c != nil {
+		return c
+	}
+	// Not in the imported files: a profile of that name YACM already has
+	// (from an earlier import of the whole folder, say).
+	if id := opts.Profiles[strings.ToLower(t)]; id != "" {
+		c := &scrtCred{c: &store.Credential{ID: id, Name: t}, existing: true}
+		if b.scrtCreds == nil {
+			b.scrtCreds = map[string]*scrtCred{}
+		}
+		b.scrtCreds[strings.ToLower(t)] = c
+		b.warn("credential set "+t, "not among the imported files; the sessions use your credential profile of that name")
 		return c
 	}
 	b.warn(sess.rel, "credential set \""+t+"\" was not found (it is in SecureCRT's Config/Credentials folder); the session's own login is used")
@@ -492,7 +529,7 @@ func addSCRTSessions(b *builder, sessions []*scrtSession, opts Options) {
 		// loginUser and loginPW are what logon actions may send: the
 		// session's own login or that of its credential set.
 		var pw, loginUser, loginPW string
-		cred := b.scrtCredential(sess)
+		cred := b.scrtCredential(sess, opts)
 		if cred != nil {
 			ss.CredentialID = cred.c.ID
 			loginUser, loginPW = cred.c.User, cred.pw
@@ -522,7 +559,7 @@ func addSCRTSessions(b *builder, sessions []*scrtSession, opts Options) {
 					ref = strings.ToLower(strings.Trim(strings.ReplaceAll(ref, `\`, "/"), "/"))
 					if js, ok := byRel[ref]; ok {
 						j := store.JumpHost{Host: js.str("Hostname"), Port: js.num("[SSH2] Port", 22), User: js.str("Username"), Auth: store.AuthAgent}
-						if jc := b.scrtCredential(js); jc != nil {
+						if jc := b.scrtCredential(js, opts); jc != nil {
 							j.CredentialID, j.User = jc.c.ID, ""
 						} else if key := scrtKeyPath(js); key != "" {
 							j.Auth, j.KeyPath = store.AuthPublicKey, key

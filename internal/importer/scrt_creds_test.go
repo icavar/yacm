@@ -114,3 +114,54 @@ func TestSecureCRTCredentialSetsXML(t *testing.T) {
 		t.Fatalf("credentials %+v, session %+v", res.Credentials, by["S1"].Session)
 	}
 }
+
+// Importing one folder inside Sessions still finds the credential sets next
+// to Sessions; a set that is not among the files is taken from the
+// profiles YACM already has.
+func TestSecureCRTCredentialSetsSubfolder(t *testing.T) {
+	root := t.TempDir()
+	files := map[string]string{
+		"Credentials/lab.ini":         "\ufeffS:\"Username\"=labuser\r\n",
+		"Sessions/Site A/r1.ini":      "\ufeffS:\"Protocol Name\"=SSH2\r\nS:\"Hostname\"=10.0.0.1\r\nS:\"Credential Title\"=lab\r\n",
+		"Sessions/Site A/r2.ini":      "S:\"Protocol Name\"=SSH2\nS:\"Hostname\"=10.0.0.2\nS:\"Credential Title\"=Old Admin\n",
+		"Sessions/Site A/Default.ini": "S:\"Protocol Name\"=SSH2\nS:\"Hostname\"=\n",
+	}
+	for f, text := range files {
+		p := filepath.Join(root, "Config", filepath.FromSlash(f))
+		os.MkdirAll(filepath.Dir(p), 0o755)
+		os.WriteFile(p, []byte(text), 0o600)
+	}
+	res, by := run(t, filepath.Join(root, "Config", "Sessions", "Site A"), KindSecureCRT, Options{Profiles: map[string]string{"old admin": "existing-id"}})
+	if len(res.Credentials) != 1 || res.Credentials[0].User != "labuser" || by["r1"].Session.CredentialID != res.Credentials[0].ID {
+		t.Fatalf("credentials %+v, r1 %+v", res.Credentials, by["r1"].Session)
+	}
+	if by["r2"].Session.CredentialID != "existing-id" {
+		t.Fatalf("r2 %+v", by["r2"].Session)
+	}
+	// A session named Default in a folder is a real one, not the template.
+	var skipped []string
+	for _, s := range res.Report.Skipped {
+		skipped = append(skipped, s.Name)
+	}
+	if strings.Join(skipped, ",") != "Default" {
+		t.Fatalf("skipped %v", skipped)
+	}
+}
+
+// Sessions that cannot be imported are named with their folder.
+func TestSecureCRTSkippedWithFolder(t *testing.T) {
+	root := t.TempDir()
+	for f, text := range map[string]string{
+		"Config/Sessions/Default.ini":       "S:\"Protocol Name\"=SSH2\nS:\"Hostname\"=\n",
+		"Config/Sessions/Marko/Default.ini": "S:\"Protocol Name\"=SSH2\nS:\"Hostname\"=\n",
+		"Config/Sessions/Marko/r1.ini":      "S:\"Protocol Name\"=SSH2\nS:\"Hostname\"=10.0.0.1\n",
+	} {
+		p := filepath.Join(root, filepath.FromSlash(f))
+		os.MkdirAll(filepath.Dir(p), 0o755)
+		os.WriteFile(p, []byte(text), 0o600)
+	}
+	res, _ := run(t, root, KindSecureCRT, Options{})
+	if len(res.Report.Skipped) != 1 || res.Report.Skipped[0].Name != "Marko/Default" {
+		t.Fatalf("skipped %+v", res.Report.Skipped)
+	}
+}
