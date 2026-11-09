@@ -11,7 +11,7 @@
   "info": {
     "companyName": "",
     "productName": "YACM",
-    "productVersion": "0.9.0",
+    "productVersion": "0.9.1",
     "copyright": "GPL-3.0-or-later",
     "comments": "Connection manager for network engineers"
   }
