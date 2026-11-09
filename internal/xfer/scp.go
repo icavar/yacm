@@ -337,6 +337,33 @@ func quoteSCP(p string) string {
 	return "'" + strings.ReplaceAll(p, "'", `'\''`) + "'"
 }
 
+// startFailed explains an SCP transfer the device did not start. When the
+// whole connection is gone, it is ErrConnClosed, so the link reconnects and
+// tries again: a device that closes the connection after each command
+// (Cisco IOS) may close it just after the channel opened.
+func startFailed(c *ssh.Client, stderr, line string, err error) error {
+	e := scpFailure(stderr, line, err)
+	if strings.TrimSpace(stderr) == "" && strings.TrimSpace(line) == "" && connGone(c) {
+		return fmt.Errorf("%w: %v", ErrConnClosed, e)
+	}
+	return e
+}
+
+// connGone tells whether the SSH connection no longer answers.
+func connGone(c *ssh.Client) bool {
+	done := make(chan error, 1)
+	go func() {
+		_, _, err := c.SendRequest("keepalive@openssh.com", true, nil)
+		done <- err
+	}()
+	select {
+	case err := <-done:
+		return err != nil
+	case <-time.After(3 * time.Second):
+		return false
+	}
+}
+
 // SCPGet copies one remote file (scp -f).
 func SCPGet(ctx context.Context, c *ssh.Client, p string, w io.Writer, progress func(int64)) error {
 	sess, err := newChannel(c)
@@ -363,7 +390,7 @@ func SCPGet(ctx context.Context, c *ssh.Client, p string, w io.Writer, progress 
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}
-			return scpFailure(stderr.String(), line, err)
+			return startFailed(c, stderr.String(), line, err)
 		}
 		switch line[0] {
 		case 'T':
@@ -433,7 +460,10 @@ func SCPPut(ctx context.Context, c *ssh.Client, p string, src io.Reader, size in
 	}
 	r := bufio.NewReader(outPipe)
 	if err := scpAck(r); err != nil {
-		return scpFailure(stderr.String(), "", err)
+		if ctx.Err() != nil {
+			return ctx.Err()
+		}
+		return startFailed(c, stderr.String(), "", err)
 	}
 	name := p
 	if i := strings.LastIndexAny(p, "/:"); i >= 0 {
