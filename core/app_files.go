@@ -505,11 +505,11 @@ func (a *App) startJob(filesID, name string, ev TransferEvent, work func(ctx con
 		what := map[string]string{"up": "upload", "down": "download", "cmd": "command output"}[ev.Dir]
 		took := time.Since(started)
 		speed := ""
-		if s := took.Seconds(); s >= 1 && final.Done > 0 {
+		if s := took.Seconds(); s >= 0.1 && final.Done > 0 {
 			speed = ", " + humanBytes(int64(float64(final.Done)/s)) + "/s"
 		}
 		if final.State == "done" {
-			applog.Infof("files %s: %s %s ↔ %s finished (%d bytes in %v%s%s)", name, what, final.Remote, final.Local, final.Done, took.Round(time.Second), speed, map[string]string{"ok": ", MD5 verified", "mismatch": ", MD5 MISMATCH"}[final.Verified])
+			applog.Infof("files %s: %s %s ↔ %s finished (%d bytes in %v%s%s)", name, what, final.Remote, final.Local, final.Done, roundTook(took), speed, map[string]string{"ok": ", MD5 verified", "mismatch": ", MD5 MISMATCH"}[final.Verified])
 		} else {
 			reason := final.Error
 			if final.State == "cancelled" {
@@ -517,7 +517,7 @@ func (a *App) startJob(filesID, name string, ev TransferEvent, work func(ctx con
 					reason = c.Error()
 				}
 			}
-			applog.Warnf("files %s: %s %s ↔ %s %s %s (%d of %d bytes in %v%s)", name, what, final.Remote, final.Local, final.State, reason, final.Done, final.Total, took.Round(time.Second), speed)
+			applog.Warnf("files %s: %s %s ↔ %s %s %s (%d of %d bytes in %v%s)", name, what, final.Remote, final.Local, final.State, reason, final.Done, final.Total, roundTook(took), speed)
 		}
 		a.emit("xfer:progress", final)
 	}()
@@ -879,4 +879,13 @@ func (a *App) ChooseFolder(title, dir string) (string, error) {
 		dir = a.LocalHome()
 	}
 	return wruntime.OpenDirectoryDialog(a.ctx, wruntime.OpenDialogOptions{Title: title, DefaultDirectory: dir, CanCreateDirectories: true})
+}
+
+// roundTook rounds how long a transfer took for the log: tenths of a second
+// below ten seconds, whole seconds above.
+func roundTook(d time.Duration) time.Duration {
+	if d < 10*time.Second {
+		return d.Round(100 * time.Millisecond)
+	}
+	return d.Round(time.Second)
 }
