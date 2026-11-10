@@ -28,6 +28,10 @@ dependencies must be permissively licensed (`tools/licensecheck`).
   certificate (`docs/security-compliance.md`).
 - Between 0.9.0 and 1.0 only fixes and release work (docs, packaging,
   distribution): no new features or structural changes.
+- New features are built in the private repository `yacm-dev`, whose `main`
+  shares this history; fixes land here first and are merged there, and the
+  features come here with the version that brings them. Commits there follow
+  the same rules, since they become public.
 - The maintainer's own instructions for AI assistants are kept outside this
   repository.
 
