@@ -45,8 +45,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # push: Linux; night: Windows and macOS; on demand and PRs: all three.
-        os: ${{ fromJSON(github.event_name == 'push' && '["ubuntu-24.04"]' || github.event_name == 'schedule' && '["windows-latest","macos-latest"]' || '["ubuntu-24.04","windows-latest","macos-latest"]') }}
+        # push: Linux; night: Windows and macOS (Windows only in a private
+        # repository, where macOS minutes count ten times); on demand and
+        # PRs: all three.
+        os: ${{ fromJSON(github.event_name == 'push' && '["ubuntu-24.04"]' || github.event_name == 'schedule' && (github.event.repository.private && '["windows-latest"]' || '["windows-latest","macos-latest"]') || '["ubuntu-24.04","windows-latest","macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
