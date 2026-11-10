@@ -1,0 +1,30 @@
+# Maintainer: The YACM Authors <support@yacm.app>
+pkgname=yacm-bin
+pkgver=0.9.1
+pkgrel=1
+pkgdesc='Connection manager for SSH, telnet and serial consoles'
+arch=('x86_64')
+url='https://yacm.app/'
+license=('GPL-3.0-or-later')
+depends=('gtk3' 'webkit2gtk-4.1')
+provides=('yacm')
+conflicts=('yacm')
+options=('!strip' '!debug')
+source=("https://github.com/icavar/yacm/releases/download/v${pkgver}/yacm-${pkgver}-linux-amd64.tar.gz"
+        "yacm-${pkgver}.svg::https://raw.githubusercontent.com/icavar/yacm/v${pkgver}/build/icon.svg"
+        "yacm-${pkgver}.png::https://raw.githubusercontent.com/icavar/yacm/v${pkgver}/build/appicon-256.png"
+        'yacm.desktop')
+sha256sums=('6ce1d70331dab67f2bf7ade592d8f718265e887478345a6cce6222b49f6c78ca'
+            'dcc2f578a2d29bd5e8b6ab527548d36f371895e11c339c2d203e3ec9a35144de'
+            '8f715a951fcb5262a64e2098a7c897d59b5ce8aeb32e7424593e681dc4777de9'
+            '7302e71dd5d5b60a9d5f8788ddcf715334f7fa43d75cca245ce2b504df2892f4')
+
+package() {
+  cd "yacm-${pkgver}-linux-amd64"
+  install -Dm755 yacm "$pkgdir/usr/bin/yacm"
+  install -Dm644 LICENSE NOTICE.md -t "$pkgdir/usr/share/licenses/$pkgname/"
+  install -Dm644 README.md -t "$pkgdir/usr/share/doc/$pkgname/"
+  install -Dm644 "$srcdir/yacm-${pkgver}.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/yacm.svg"
+  install -Dm644 "$srcdir/yacm-${pkgver}.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/yacm.png"
+  install -Dm644 "$srcdir/yacm.desktop" -t "$pkgdir/usr/share/applications/"
+}

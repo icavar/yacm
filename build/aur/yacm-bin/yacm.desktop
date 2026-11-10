@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=YACM
+GenericName=Connection Manager
+Comment=SSH, telnet and serial connection manager
+Exec=yacm
+Icon=yacm
+Terminal=false
+Categories=Network;RemoteAccess;System;
+Keywords=ssh;telnet;serial;console;sftp;scp;tftp;network;cisco;
+StartupWMClass=yacm
