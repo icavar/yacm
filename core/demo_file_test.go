@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/icavar/yacm/internal/exchange"
@@ -82,9 +83,13 @@ func TestLabFileImports(t *testing.T) {
 	if sftp == nil || len(sftp.Session.Tunnels) != 2 || !sftp.Session.Tunnels[0].Off {
 		t.Fatalf("tunnels from a file must arrive switched off: %+v", sftp)
 	}
+	// A proxy from someone else's file is left out (the import says so).
 	px := byName["bastion2 directly, through the proxy"]
-	if e, err := a.store.Effective(px); err != nil || e.Proxy == nil || e.Proxy.Port != 11080 || len(e.Hops) != 0 {
+	if e, err := a.store.Effective(px); err != nil || e.Proxy != nil || len(e.Hops) != 0 {
 		t.Fatalf("proxy session %+v %v", e, err)
+	}
+	if !strings.Contains(strings.Join(rep.Warnings, "\n"), "left out from the file: outbound proxy") {
+		t.Fatalf("no warning about the proxy: %q", rep.Warnings)
 	}
 }
 

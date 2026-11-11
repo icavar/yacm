@@ -57,7 +57,9 @@ make -C testlab/clab down
 bastion1 → bastion2), servers (srv-sftp has an -L tunnel to srv-web on
 127.0.0.1:18080 and a SOCKS/HTTP proxy on 127.0.0.1:11080; tunnels from a
 file arrive switched off, start them in Tunnels), sessions behind the locked
-bastion, edge1 over telnet and a group that connects through the SOCKS proxy.
+bastion, edge1 over telnet and a group that connects through the SOCKS proxy
+(a proxy from a file is left out on import: set SOCKS5 127.0.0.1:11080 in
+that group's settings).
 
 The topologies are written by `testlab/clab/topology.py` (one source for the
 cEOS and the Linux variant); change that and run it, not the YAML files.
