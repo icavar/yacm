@@ -384,7 +384,7 @@ vault (`vault.json`), trusted host keys (`known_hosts`) and session logs
   contents. Settings > About > *Copy diagnostics* puts versions, a few
   settings and the end of the log on the clipboard for a bug report.
 - **Updates**: YACM never updates itself. Installed with Homebrew
-  (`brew install --cask icavar/tap/yacm`), it is updated there; the Linux
+  (`brew install --cask yacm-app/tap/yacm`), it is updated there; the Linux
   .deb and .rpm packages add the YACM package repository (pkg.yacm.app), so
   `apt upgrade` or `dnf upgrade` update them; the zip and tar.gz versions are
   replaced with the new download. The data folder stays as it is. An update check that asks GitHub once a day
