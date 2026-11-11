@@ -46,11 +46,24 @@ func desktopEntry(icon []byte) {
 	}
 	for _, sys := range []string{"/usr/share/applications/yacm.desktop", "/usr/local/share/applications/yacm.desktop"} {
 		if _, err := os.Stat(sys); err == nil {
-			return // installed by a package
+			// Installed by a package: an entry of ours from an earlier
+			// tar.gz would hide the package's, so it goes.
+			removeOwnEntry(data)
+			return
 		}
 	}
 	if err := writeDesktopEntry(data, exe, icon); err != nil {
 		applog.Warnf("menu entry: %v", err)
+	}
+}
+
+// removeOwnEntry deletes the entry (and icon) YACM wrote under data, never
+// one the user wrote.
+func removeOwnEntry(data string) {
+	entry := filepath.Join(data, "applications", "yacm.desktop")
+	if b, err := os.ReadFile(entry); err == nil && strings.Contains(string(b), desktopMarker) {
+		_ = os.Remove(entry)
+		_ = os.Remove(filepath.Join(data, "icons", "yacm.png"))
 	}
 }
 

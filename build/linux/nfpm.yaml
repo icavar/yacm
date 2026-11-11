@@ -1,0 +1,63 @@
+# .deb and .rpm packages of YACM. build/package.sh fills in ${VERSION}, ${BIN}
+# (the Linux program) and ${DOCS} (where THIRD-PARTY-NOTICES.txt is) and runs
+# nfpm with it.
+name: yacm
+arch: amd64
+platform: linux
+version: ${VERSION}
+release: 1
+section: net
+priority: optional
+maintainer: The YACM Authors <support@yacm.app>
+vendor: The YACM Authors
+homepage: https://yacm.app/
+license: GPL-3.0-or-later
+description: |-
+  Connection manager for SSH, telnet and serial consoles.
+  YACM keeps SSH, telnet and serial sessions in one tree, with an encrypted
+  vault for passwords and keys, credential profiles, jump hosts, tunnels,
+  file transfer and TFTP, HTTP and SCP file servers, session logs and team
+  libraries.
+depends:
+  - libgtk-3-0t64 | libgtk-3-0
+  - libwebkit2gtk-4.1-0
+overrides:
+  rpm:
+    depends:
+      - libgtk-3.so.0()(64bit)
+      - libwebkit2gtk-4.1.so.0()(64bit)
+contents:
+  - src: ${BIN}
+    dst: /usr/bin/yacm
+    file_info: {mode: 0755}
+  - src: build/linux/yacm.desktop
+    dst: /usr/share/applications/yacm.desktop
+  - src: build/icon.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/yacm.svg
+  - src: build/appicon-256.png
+    dst: /usr/share/icons/hicolor/256x256/apps/yacm.png
+  - src: LICENSE
+    dst: /usr/share/doc/yacm/LICENSE
+  - src: NOTICE.md
+    dst: /usr/share/doc/yacm/NOTICE.md
+  - src: README.md
+    dst: /usr/share/doc/yacm/README.md
+  - src: ${DOCS}/THIRD-PARTY-NOTICES.txt
+    dst: /usr/share/doc/yacm/THIRD-PARTY-NOTICES.txt
+  # Updates through apt / dnf from pkg.yacm.app (kept when changed).
+  - src: build/linux/yacm.sources
+    dst: /etc/apt/sources.list.d/yacm.sources
+    type: config|noreplace
+    packager: deb
+  - src: build/linux/yacm-packages.asc
+    dst: /usr/share/keyrings/yacm-packages.asc
+    file_info: {mode: 0644}
+    packager: deb
+  - src: build/linux/yacm.repo
+    dst: /etc/yum.repos.d/yacm.repo
+    type: config|noreplace
+    packager: rpm
+  - src: build/linux/yacm-packages.asc
+    dst: /etc/pki/rpm-gpg/RPM-GPG-KEY-yacm
+    file_info: {mode: 0644}
+    packager: rpm

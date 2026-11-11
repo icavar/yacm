@@ -3,6 +3,7 @@
 #   dist/yacm-<version>-windows-x64.zip        YACM.exe for x64
 #   dist/yacm-<version>-windows-arm64.zip      YACM.exe for ARM
 #   dist/yacm-<version>-linux-amd64.tar.gz     yacm
+#   dist/yacm-<version>-linux-amd64.deb, .rpm  yacm with menu entry and updates
 #   dist/yacm-demo-device-<version>-windows.zip       the demo device and demo.yacm
 #   dist/yacm-demo-device-<version>-linux-amd64.tar.gz
 # The demo is a separate download: YACM itself does not need it.
@@ -10,6 +11,7 @@
 # Needs Go, Node and, for the Linux build, libgtk-3-dev and
 # libwebkit2gtk-4.1-dev. The Windows executables are cross-compiled (no cgo),
 # so this runs on Linux. Set SKIP_FRONTEND=1 if frontend/dist is already built.
+# The .deb and .rpm need nfpm (https://nfpm.goreleaser.com; NFPM=path).
 # macOS has its own script: build/darwin/build-macos.sh (must run on a Mac).
 set -euo pipefail
 
@@ -50,6 +52,15 @@ sed 's/yacm-demo-device\.exe/yacm-demo-device/g; s/Start it by double-clicking; 
 go run ./tools/licensecheck -notices "$OUT/THIRD-PARTY-NOTICES.txt" >/dev/null
 for d in "$WX" "$WA" "$L"; do cp README.md LICENSE NOTICE.md "$OUT/THIRD-PARTY-NOTICES.txt" "$d/"; done
 for d in "$DW" "$DL"; do cp LICENSE NOTICE.md "$OUT/THIRD-PARTY-NOTICES.txt" "$d/"; done
+
+# Linux .deb and .rpm (menu entry, icons, and updates from pkg.yacm.app)
+# with nfpm (NFPM= the program, if it is not on the PATH).
+NFPM=${NFPM:-nfpm}
+sed -e "s|\${VERSION}|$V|; s|\${BIN}|$L/yacm|; s|\${DOCS}|$OUT|" build/linux/nfpm.yaml >"$OUT/nfpm.yaml"
+for fmt in deb rpm; do
+	"$NFPM" package -f "$OUT/nfpm.yaml" -p $fmt -t "$OUT/yacm-$V-linux-amd64.$fmt" >/dev/null
+done
+rm "$OUT/nfpm.yaml"
 rm "$OUT/THIRD-PARTY-NOTICES.txt"
 
 (cd "$WX" && sha256sum YACM.exe >SHA256SUMS.txt)
