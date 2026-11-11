@@ -54,8 +54,8 @@ thousands with your team. For Windows, macOS and Linux. Website:
 - **Switch in minutes.** Imports SecureCRT (with logon actions, credential
   sets and saved passwords), Xshell, MobaXterm, mRemoteNG, PuTTY, Ásbrú,
   `~/.ssh/config`, CSV and Excel lists, and NetBox.
-- **Free, open and portable.** GPL-licensed; no installer, no administrator
-  rights (except once for TFTP on port 69 under Linux), no account. It even
+- **Free, open and portable.** GPL-licensed; runs without installation or
+  administrator rights (except once for TFTP on port 69 under Linux), no account. It even
   runs from a USB stick.
 
 ## Screenshots
@@ -78,9 +78,14 @@ Get the latest version from [Releases](https://github.com/icavar/yacm/releases):
   SmartScreen may ask: *More info > Run anyway*.
 - **macOS** (13 or newer, Apple silicon and Intel): open `YACM-*-macos.dmg`
   and drag YACM to Applications. The app is signed and notarised.
-- **Linux** (x64): unpack `yacm-*-linux-amd64.tar.gz` and start `./yacm`. It
-  needs WebKitGTK 4.1 (`sudo apt install libwebkit2gtk-4.1-0` on Ubuntu 22.04
-  and Debian 12 or newer) and adds itself to the application menu.
+- **Linux** (x64):
+  - Ubuntu 22.04+ and Debian 12+: `sudo apt install ./yacm-*-linux-amd64.deb`
+  - Fedora and other RPM systems: `sudo dnf install ./yacm-*-linux-amd64.rpm`
+
+  Both packages add the YACM package repository (pkg.yacm.app, signed), so
+  `apt upgrade` or `dnf upgrade` bring new versions. On other distributions,
+  unpack `yacm-*-linux-amd64.tar.gz` and start `./yacm`; it needs WebKitGTK
+  4.1 and adds itself to the application menu.
 
 Every release has SHA-256 checksums, a software bill of materials and a
 build provenance attestation for each file

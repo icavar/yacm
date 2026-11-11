@@ -384,9 +384,10 @@ vault (`vault.json`), trusted host keys (`known_hosts`) and session logs
   contents. Settings > About > *Copy diagnostics* puts versions, a few
   settings and the end of the log on the clipboard for a bug report.
 - **Updates**: YACM never updates itself. Installed with Homebrew
-  (`brew install --cask icavar/tap/yacm`), it is updated there; the zip and
-  tar.gz versions are replaced with the new download, and the data folder
-  stays as it is. An update check that asks GitHub once a day
+  (`brew install --cask icavar/tap/yacm`), it is updated there; the Linux
+  .deb and .rpm packages add the YACM package repository (pkg.yacm.app), so
+  `apt upgrade` or `dnf upgrade` update them; the zip and tar.gz versions are
+  replaced with the new download. The data folder stays as it is. An update check that asks GitHub once a day
   whether a newer version is out is off by default and only switched on in
   Settings > General; only that question is sent. Settings > About checks by
   hand.
@@ -399,7 +400,8 @@ vault (`vault.json`), trusted host keys (`known_hosts`) and session logs
 - On Linux YACM keeps a menu entry for itself
   (`~/.local/share/applications/yacm.desktop` and its icon), so the dock and
   the application list show the YACM icon; it follows the program when you
-  move it, and an entry you or a package wrote is left alone.
+  move it, and an entry you wrote is left alone. Once the .deb or .rpm
+  package is installed, the package's entry is used and YACM removes its own.
 
 ## Security model
 

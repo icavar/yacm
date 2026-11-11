@@ -20,6 +20,17 @@ Signed files: `YACM.exe` in `yacm-*-windows-x64.zip` and
 The app and the demo device are signed with the project's Apple Developer ID
 certificate and notarised by Apple.
 
+## Linux
+
+The package repository `pkg.yacm.app` (apt and dnf) is signed with the
+project's OpenPGP key "YACM packages <support@yacm.app>", fingerprint
+`9C9A 2975 7D17 AFD5 51B6  0BFB 1FA9 9EB2 609B DAAF`. The repository index
+and every `.rpm` package are signed with it; apt checks the `.deb` packages
+through the signed index. The `.deb` and `.rpm` packages bring the key with
+them (`/usr/share/keyrings/yacm-packages.asc`,
+`/etc/pki/rpm-gpg/RPM-GPG-KEY-yacm`), and it is published at
+<https://pkg.yacm.app/yacm.asc>.
+
 ## All systems
 
 Every release is built by GitHub Actions in this repository from a commit on
@@ -47,4 +58,6 @@ unless specifically requested by the user or the person installing or
 operating it. YACM connects only to the devices, jump hosts, proxies and
 services (such as NetBox) that the user configures. The update check is off
 unless the user switches it on; it then asks GitHub for the list of releases
-and sends nothing else. See [SECURITY.md](../SECURITY.md).
+and sends nothing else. When the Linux `.deb` or `.rpm` package is installed,
+the system's package manager (apt or dnf) asks `pkg.yacm.app` for updates
+together with the other repositories. See [SECURITY.md](../SECURITY.md).
