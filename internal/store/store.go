@@ -4,6 +4,7 @@
 package store
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
@@ -88,6 +89,23 @@ func Open(path string) (*Store, error) {
 		return nil, fmt.Errorf("%s was written by a newer version (schema %d)", path, f.Version)
 	}
 	s.fileExtra = f.Extra
+	if f.Settings.FontSize == 0 {
+		// Settings with font size 0 (a hand edit, another tool) are still
+		// settings: keep them over the defaults rather than drop them all,
+		// team libraries included, at the next save.
+		var probe struct {
+			Settings json.RawMessage `json:"settings"`
+		}
+		if json.Unmarshal(data, &probe) == nil && len(bytes.TrimSpace(probe.Settings)) > 2 {
+			st := DefaultSettings()
+			if json.Unmarshal(probe.Settings, &st) == nil {
+				if st.FontSize == 0 {
+					st.FontSize = DefaultSettings().FontSize
+				}
+				f.Settings = st
+			}
+		}
+	}
 	if f.Settings.FontSize != 0 {
 		s.settings = f.Settings
 		if f.Version < 2 {

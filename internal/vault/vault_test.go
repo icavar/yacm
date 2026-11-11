@@ -81,3 +81,30 @@ func TestTamperedHeaderRejected(t *testing.T) {
 		t.Fatalf("tamper not detected: %v", err)
 	}
 }
+
+// A password change that cannot be written leaves the old password in force,
+// also for the next save.
+func TestChangePasswordWriteFails(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "vault.json")
+	v := New(p)
+	if err := v.Create("correct horse battery"); err != nil {
+		t.Fatal(err)
+	}
+	blocker := filepath.Join(t.TempDir(), "file")
+	os.WriteFile(blocker, nil, 0o600)
+	v.path = filepath.Join(blocker, "vault.json") // a folder that cannot exist
+	if err := v.ChangePassword("correct horse battery", "new master password"); err == nil {
+		t.Fatal("the change was written")
+	}
+	v.path = p
+	if !v.VerifyPassword("correct horse battery") {
+		t.Fatal("old password no longer accepted")
+	}
+	if err := v.Set("node/a/password", "x"); err != nil {
+		t.Fatal(err)
+	}
+	v2 := New(p)
+	if err := v2.Unlock("correct horse battery"); err != nil {
+		t.Fatalf("saved under another password: %v", err)
+	}
+}

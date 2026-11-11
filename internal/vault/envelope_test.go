@@ -32,6 +32,11 @@ func TestSealOpenMap(t *testing.T) {
 	if _, err := OpenMap("x", nil); err == nil {
 		t.Fatal("nil envelope")
 	}
+	// A file cannot ask for gigabytes of memory.
+	env.KDF.MemKiB = 4 * 1024 * 1024
+	if _, err := OpenMap("export-password-1", env); err == nil || errors.Is(err, ErrWrongPassword) {
+		t.Fatalf("4 GiB Argon2 accepted: %v", err)
+	}
 }
 
 func TestSnapshotKeysCountReadOnly(t *testing.T) {

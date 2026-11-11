@@ -17,6 +17,8 @@ import (
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
+
+	"github.com/icavar/yacm/internal/store"
 )
 
 // KnownHosts verifies server host keys against YACM's own known_hosts file
@@ -316,11 +318,7 @@ func (k *KnownHosts) removeLocked(host string) error {
 		}
 		out.WriteString(line + "\n")
 	}
-	tmp := k.ownPath + ".tmp"
-	if err := os.WriteFile(tmp, out.Bytes(), 0o600); err != nil {
-		return err
-	}
-	return os.Rename(tmp, k.ownPath)
+	return store.WriteFileAtomic(k.ownPath, out.Bytes(), 0o600)
 }
 
 func lineMatchesHost(line, host string) bool {

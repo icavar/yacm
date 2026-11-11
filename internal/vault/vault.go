@@ -278,9 +278,12 @@ func (v *Vault) ChangePassword(oldPw, newPw string) error {
 	if v.readOnly {
 		return ErrReadOnly
 	}
-	old := v.key
+	oldKDF, old := v.kdf, v.key
 	v.kdf, v.key = p, key
 	if err := v.sealLocked(); err != nil {
+		// Nothing was written: keep the old password in force.
+		v.kdf, v.key = oldKDF, old
+		wipe(key)
 		return err
 	}
 	wipe(old)
@@ -498,6 +501,13 @@ func OpenMap(password string, e *Envelope) (map[string]string, error) {
 	}
 	if e.V != formatVersion {
 		return nil, fmt.Errorf("unsupported format version %d", e.V)
+	}
+	// An envelope comes from someone else's file: tighter limits than for
+	// your own vault, so a file cannot make YACM take gigabytes of memory
+	// or minutes of work (YACM writes 64 MiB, 3 passes).
+	if k := e.KDF; (k.Alg == KDFArgon2id && (k.MemKiB > 512*1024 || k.Time > 16 || k.Threads > 16)) ||
+		(k.Alg == KDFPBKDF2 && k.Iter > 5_000_000) {
+		return nil, errors.New("the encrypted data asks for too much work to open")
 	}
 	key, err := derive(password, e.KDF)
 	if err != nil {

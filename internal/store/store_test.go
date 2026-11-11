@@ -4,6 +4,7 @@
 package store
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -40,5 +41,20 @@ func TestTreeOps(t *testing.T) {
 	}
 	if _, err := s2.Upsert(&Node{Name: "bad", Session: &Session{Protocol: ProtoSerial}}); err == nil {
 		t.Fatal("serial without device accepted")
+	}
+}
+
+// Settings written with font size 0 are kept (with the default font size),
+// not replaced by the defaults.
+func TestSettingsWithFontSizeZero(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "sessions.json")
+	os.WriteFile(p, []byte(`{"version":2,"settings":{"fontSize":0,"theme":"light","scrollback":2000},"nodes":[]}`), 0o600)
+	s, err := Open(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	st := s.Settings()
+	if st.Theme != "light" || st.Scrollback != 2000 || st.FontSize != DefaultSettings().FontSize {
+		t.Fatalf("settings %+v", st)
 	}
 }

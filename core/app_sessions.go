@@ -175,6 +175,13 @@ func (a *App) Connect(req ConnectRequest) (string, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.cancel = cancel
 	a.tabsMu.Lock()
+	if cur, ok := a.tabs[t.id]; (ok || existing != nil) && cur != existing {
+		// Another Connect for this tab (a double click on Reconnect, or a
+		// reload racing a manual reconnect) got there first.
+		a.tabsMu.Unlock()
+		cancel()
+		return "", errors.New("already connected")
+	}
 	a.tabs[t.id] = t
 	a.tabsMu.Unlock()
 	go a.run(ctx, t, req.ApproveBefore)
