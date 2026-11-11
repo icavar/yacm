@@ -26,6 +26,8 @@ func TestLogFileName(t *testing.T) {
 		{"{name}{unknown}", "core-sw1{unknown}.log"},
 		{"con", "_con.log"},
 		{"{ticket}", "core-sw1.log"},
+		{"{name}.bat", "core-sw1.bat.log"},
+		{"{name}.TXT", "core-sw1.TXT"},
 	}
 	for _, c := range cases {
 		if got := LogFileName(c.tmpl, v); got != c.want {

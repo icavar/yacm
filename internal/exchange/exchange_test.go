@@ -255,14 +255,46 @@ func TestImportFromSomeoneElse(t *testing.T) {
 		t.Fatalf("crafted ID kept: %+v", a)
 	}
 	b := byName["borrow"].Session
-	if b.CredentialID != "" || b.Proxy.CredentialID != "" {
-		t.Fatalf("reference to a profile not in the file kept: %q %q", b.CredentialID, b.Proxy.CredentialID)
+	if b.CredentialID != "" || b.Proxy != nil {
+		t.Fatalf("reference to a profile not in the file, or the file's proxy, kept: %q %+v", b.CredentialID, b.Proxy)
 	}
 	if b.KeyPath != "" || !b.Before[0].Confirm {
 		t.Fatalf("network path or unconfirmed local command kept: %+v", b)
 	}
 	if d := byName["serial"].Session.Serial.Device; d != `\\.\COM10` {
 		t.Fatalf("a local device path was dropped: %q", d)
+	}
+}
+
+// A file cannot turn on agent forwarding, route your logins through its
+// proxy or choose where device output is written on your computer.
+func TestImportDropsForwardingProxyAndLogPaths(t *testing.T) {
+	data := `{"format":"` + Format + `","version":1,"nodes":[
+	  {"id":"g1","name":"Site","isGroup":true,"defaults":{"logName":"run.bat","proxy":{"type":"socks5","host":"203.0.113.9","port":1080}}},
+	  {"id":"s1","parentId":"g1","name":"R1","session":{"protocol":"ssh","host":"203.0.113.9","port":22,
+	    "agentForward":true,"logToFile":true,"logDir":"/tmp/startup","logName":"run.bat",
+	    "proxy":{"type":"socks5","host":"203.0.113.9","port":1080}}}]}`
+	f, err := Parse([]byte(data))
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := PlanImport(f, nil, nil, ImportOptions{Target: "root", OnConflict: "copy"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(p.Insert) != 2 { // Site, R1
+		t.Fatalf("inserted %d, skipped %+v", len(p.Insert), p.Report.Skipped)
+	}
+	for _, n := range p.Insert {
+		if s := n.Session; s != nil && (s.AgentForward || s.Proxy != nil || s.LogDir != "" || s.LogName != "") {
+			t.Fatalf("session kept: %+v", s)
+		}
+		if d := n.Defaults; d != nil && (d.Proxy != nil || d.LogName != "") {
+			t.Fatalf("group kept: %+v", d)
+		}
+	}
+	if w := strings.Join(p.Report.Warnings, "\n"); !strings.Contains(w, "agent forwarding") || !strings.Contains(w, "outbound proxy") {
+		t.Fatalf("warnings %q", w)
 	}
 }
 
@@ -305,10 +337,16 @@ func TestImportedHostKeysStayWithTheirHosts(t *testing.T) {
 			"|1|abc=|def= ssh-ed25519 AAAA",
 			"203.0.113.9 ssh-ed25519 AAAA",
 			"10.0.0.1,203.0.113.9 ssh-ed25519 AAAA",
+			// Forms the host key check cannot read (one would make it skip
+			// the whole file), and revocations, which a file cannot add.
+			"[10.0.0.1] ssh-ed25519 AAAA",
+			"[10.0.0.1]x:22 ssh-ed25519 AAAA",
+			"[10.0.0.1]:abc ssh-ed25519 AAAA",
+			"@revoked 10.0.0.1 ssh-ed25519 AAAA",
 		},
 	}
 	keep, dropped := sessionHostKeys(f)
-	if len(keep) != 3 || dropped != 6 {
+	if len(keep) != 3 || dropped != 10 {
 		t.Fatalf("keep %q, dropped %d", keep, dropped)
 	}
 }

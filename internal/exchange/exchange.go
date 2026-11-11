@@ -27,6 +27,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -507,6 +508,9 @@ func PlanImport(f *File, existing map[string]*store.Node, existingCreds map[stri
 		// sessions from someone else's file.
 		store.DropUnknown(n)
 		store.DisarmTunnels(n)
+		if cleared := store.FromSomeoneElse(n); len(cleared) > 0 {
+			p.Report.Warnings = append(p.Report.Warnings, fmt.Sprintf("%s: left out from the file: %s (set it yourself if you trust it)", n.Name, strings.Join(cleared, ", ")))
+		}
 		if _, dropped := store.FromElsewhere(n); len(dropped) > 0 {
 			p.Report.Warnings = append(p.Report.Warnings, fmt.Sprintf("%s: %d path(s) to files or devices on other computers were left out (on Windows, opening one sends your login to that server)", n.Name, len(dropped)))
 			if err := store.Validate(n); err != nil {
@@ -764,9 +768,8 @@ func sessionHostKeys(f *File) (keep []string, dropped int) {
 
 func knownHostLineFor(line string, hosts map[string]bool) bool {
 	fields := strings.Fields(line)
-	if len(fields) > 0 && fields[0] == "@revoked" {
-		fields = fields[1:] // revoking a key only takes trust away
-	}
+	// No markers: a file can neither add a certificate authority nor revoke
+	// one of your keys (a revocation it adds could not be removed in YACM).
 	if len(fields) < 3 || strings.HasPrefix(fields[0], "@") || strings.HasPrefix(fields[0], "|") {
 		return false
 	}
@@ -775,8 +778,14 @@ func knownHostLineFor(line string, hosts map[string]bool) bool {
 			return false
 		}
 		if strings.HasPrefix(h, "[") {
+			// Only [host]:port with a port number: the host key check
+			// refuses the whole file on any other bracket form.
 			end := strings.Index(h, "]")
-			if end < 0 || h[end+1:] == ":22" {
+			if end < 0 || !strings.HasPrefix(h[end+1:], ":") {
+				return false
+			}
+			port, err := strconv.Atoi(h[end+2:])
+			if err != nil || port < 1 || port > 65535 || port == 22 {
 				return false // [host]:22 is the plain host written another way
 			}
 			h = h[1:end]

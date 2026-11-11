@@ -39,6 +39,43 @@ func SerialDeviceOK(d string) bool {
 
 var serialDevice = regexp.MustCompile(`(?i)^(?:COM\d+|\\\\\.\\COM\d+|/dev/[A-Za-z0-9._/:+-]+)$`)
 
+// FromSomeoneElse clears what a session or group from another person's file
+// (a .yacm import) could use against you: agent forwarding (the far host
+// could use your keys), the outbound proxy (your logins would cross a proxy
+// the file chose) and the log folder and file name (where device output is
+// written on this computer). Team libraries leave these out the same way.
+// It returns the names of what it cleared.
+func FromSomeoneElse(n *Node) (cleared []string) {
+	if n == nil {
+		return nil
+	}
+	if s := n.Session; s != nil {
+		if s.AgentForward {
+			s.AgentForward = false
+			cleared = append(cleared, "agent forwarding")
+		}
+		if s.Proxy != nil {
+			s.Proxy = nil
+			cleared = append(cleared, "outbound proxy")
+		}
+		if s.LogDir != "" || s.LogName != "" {
+			s.LogDir, s.LogName = "", ""
+			cleared = append(cleared, "log folder and file name")
+		}
+	}
+	if d := n.Defaults; d != nil {
+		if d.Proxy != nil {
+			d.Proxy = nil
+			cleared = append(cleared, "outbound proxy")
+		}
+		if d.LogName != "" {
+			d.LogName = ""
+			cleared = append(cleared, "log file name")
+		}
+	}
+	return cleared
+}
+
 // FromElsewhere makes a node from someone else's file (an import, a .yacm
 // file) safe to keep with your own sessions: local commands ask before they
 // run and paths to other computers are dropped. It returns how many local

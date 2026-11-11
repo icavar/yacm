@@ -267,7 +267,8 @@ Hovering shows each label.
   logs); a log is never overwritten.
 - **File names from a template**: `{group}/{name}_{date}_{time}.log`, with
   `{host}`, `{user}`, `{protocol}`, `{path}` (one folder per group) and
-  `{ticket}`, optionally per group or session.
+  `{ticket}`, optionally per group or session. Log files end in `.log` or
+  `.txt`; any other ending gets `.log` added.
 - **Change or ticket numbers**: YACM can ask for a change or ticket number when
   connecting (for every session that logs, or only in groups that ask), so a
   log is easy to find for an audit.

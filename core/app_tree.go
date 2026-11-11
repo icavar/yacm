@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/icavar/yacm/internal/applog"
 	"github.com/icavar/yacm/internal/sshconn"
 	"github.com/icavar/yacm/internal/store"
 	"github.com/icavar/yacm/internal/vault"
@@ -345,6 +346,7 @@ func (a *App) SaveSettings(s store.Settings) error {
 		return err
 	}
 	a.kh = sshconn.NewKnownHosts(filepath.Join(a.dataDir, "known_hosts"), s.UseSystemKnownHost)
+	a.kh.Warn = func(m string) { applog.Warnf("trusted host keys: %s", m) }
 	return nil
 }
 

@@ -143,6 +143,7 @@ func newApp(loc dataLocation) (*App, error) {
 		xfers:   map[string]*transferJob{},
 	}
 	a.kh = sshconn.NewKnownHosts(filepath.Join(dir, "known_hosts"), st.Settings().UseSystemKnownHost)
+	a.kh.Warn = func(m string) { applog.Warnf("trusted host keys: %s", m) }
 	a.restart = a.relaunch
 	if unavailable {
 		a.setReadOnly()

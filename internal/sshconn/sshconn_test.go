@@ -621,14 +621,15 @@ func TestImportLinesRefusesWideEntries(t *testing.T) {
 }
 
 // "[host]:22" is the plain host: an import cannot add a second key for a
-// host you trust that way. Revocations come along.
+// host you trust that way. Revocations do not come along (they could not be
+// removed in YACM).
 func TestImportLinesNormalisesHosts(t *testing.T) {
 	a, b := newSigner(t), newSigner(t)
 	dst := NewKnownHosts(filepath.Join(t.TempDir(), "kh"), false)
 	dst.Trust("10.0.0.1:22", a.PublicKey(), false)
 	keyB := strings.TrimSpace(string(ssh.MarshalAuthorizedKey(b.PublicKey())))
 	n, err := dst.ImportLines([]string{"[10.0.0.1]:22 " + keyB, "@revoked 10.0.0.9 " + keyB})
-	if err != nil || n != 1 {
+	if err != nil || n != 0 {
 		t.Fatalf("added %d, %v", n, err)
 	}
 	if types := dst.KnownKeyTypes("10.0.0.1:22"); len(types) != 1 {
@@ -650,5 +651,52 @@ func TestImportLinesSeesSystemKnownHosts(t *testing.T) {
 	keyB := strings.TrimSpace(string(ssh.MarshalAuthorizedKey(b.PublicKey())))
 	if n, err := dst.ImportLines([]string{"10.0.0.1 " + keyB}); err != nil || n != 0 {
 		t.Fatalf("added %d, %v", n, err)
+	}
+}
+
+// A line the host key check cannot read ("[host]" without a port) is not
+// imported, and one that is in the file anyway (a hand edit) does not make
+// the check drop the other keys in it.
+func TestUnreadableKnownHostsLine(t *testing.T) {
+	a, b := newSigner(t), newSigner(t)
+	path := filepath.Join(t.TempDir(), "kh")
+	kh := NewKnownHosts(path, false)
+	keyB := strings.TrimSpace(string(ssh.MarshalAuthorizedKey(b.PublicKey())))
+	for _, bad := range []string{"[10.9.9.9] " + keyB, "[a]b:1 " + keyB, "|1|x|y " + keyB} {
+		if LineReadable(bad) {
+			t.Errorf("%q counted as readable", bad)
+		}
+		if n, _ := kh.ImportLines([]string{bad}); n != 0 {
+			t.Errorf("%q imported", bad)
+		}
+	}
+	if err := kh.Trust("10.0.0.1:22", a.PublicKey(), false); err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.WriteString("[10.9.9.9] " + keyB + "\n")
+	f.Close()
+	var warned string
+	kh.Warn = func(m string) { warned = m }
+	addr := &net.TCPAddr{IP: net.ParseIP("10.0.0.1"), Port: 22}
+	asked := 0
+	cb := kh.Callback(func(info HostKeyInfo) (bool, error) {
+		asked++
+		if !info.Changed || len(info.KnownKeys) != 1 {
+			t.Errorf("changed key not reported as changed: %+v", info)
+		}
+		return false, nil
+	})
+	if err := cb("10.0.0.1:22", addr, a.PublicKey()); err != nil {
+		t.Fatalf("trusted key: %v", err)
+	}
+	if err := cb("10.0.0.1:22", addr, b.PublicKey()); err == nil || asked != 1 {
+		t.Fatalf("changed key: %v, asked %d", err, asked)
+	}
+	if !strings.Contains(warned, "line 2") {
+		t.Fatalf("warning %q", warned)
 	}
 }

@@ -97,8 +97,12 @@ Safety rules on import (a file may come from someone else):
 - Trusted host keys are added only when you tick the box (off by default),
   only as plain keys for the hosts of the sessions in the file, and never over
   a key you already trust (also when written as `[host]:22`). Wildcards,
-  hashed names and `@cert-authority` lines are left out; `@revoked` lines
-  for those hosts come along (they only take trust away).
+  hashed names, markers (`@cert-authority`, `@revoked`) and host names in a
+  form the host key check cannot read (`[host]` without a port) are left
+  out.
+- Agent forwarding, the outbound proxy and the log folder and file name of
+  sessions and groups in a `.yacm` file are left out and named in the
+  report: set them again yourself for sessions you trust.
 - Paths to files on other computers (`\\server\share\…`, also written as
   `\\.\UNC\…` or `\\?\UNC\…`) and serial devices other than a local port
   (`COM3`, `\\.\COM10`, `/dev/…`) are left out, also from CSV/Excel and

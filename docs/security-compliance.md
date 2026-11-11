@@ -90,7 +90,9 @@ SCP) and tunnels listen only while the user switches them on.
   sessions never start tunnels or run local commands by themselves.
 - Files from someone else (imports, `.yacm` files, team libraries) cannot
   run local commands without asking, add trusted host keys beyond plain keys
-  for their own sessions' hosts, point at files on other computers, borrow
+  for their own sessions' hosts, turn on agent forwarding, send logins
+  through a proxy of their choosing, choose where session logs are written,
+  point at files on other computers, borrow
   stored secrets or credential profiles through crafted IDs, or put the
   user's login into a command: in team library automation and saved
   commands, `<USER>` and `<PASS>` only answer login prompts. Changes to a

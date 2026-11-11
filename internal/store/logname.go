@@ -38,7 +38,7 @@ var (
 	logReserved  = regexp.MustCompile(`(?i)^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\.|$)`)
 	logEdgeChars = "_-. "
 	// logExt is what counts as a file extension (not ".1" of an address).
-	logExt = regexp.MustCompile(`^\.[A-Za-z][A-Za-z0-9]{0,7}$`)
+	logExt = regexp.MustCompile(`(?i)^\.(?:log|txt)$`) // never .bat, .exe … (a file name a device can fill)
 )
 
 // LogFileName expands a template into a relative path (with "/" between

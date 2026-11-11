@@ -6,6 +6,7 @@ package sshconn
 import (
 	"bufio"
 	"bytes"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net"
@@ -29,6 +30,10 @@ type KnownHosts struct {
 	// ReadOnly: accepted keys are trusted for that connection only and the
 	// file is not changed (the data folder is in use elsewhere).
 	ReadOnly bool
+	// Warn, if set, is told about lines the host key check cannot read.
+	Warn func(msg string)
+
+	warned map[string]bool // file + its size and time: already told
 }
 
 // ErrReadOnly is returned when the known_hosts file may not be changed.
@@ -79,7 +84,12 @@ func (k *KnownHosts) check(hostname string, remote net.Addr, key ssh.PublicKey) 
 	for _, f := range k.files() {
 		cb, err := knownhosts.New(f)
 		if err != nil {
-			continue // unreadable or malformed file: ignore rather than block
+			// One line the parser cannot read makes it refuse the whole
+			// file, which would quietly drop every key in it: use the
+			// lines it can read instead.
+			if cb, err = k.readableLines(f); err != nil {
+				continue // unreadable file: ignore rather than block
+			}
 		}
 		err = cb(hostname, remote, key)
 		if err == nil {
@@ -109,6 +119,105 @@ func (k *KnownHosts) check(hostname string, remote net.Addr, key ssh.PublicKey) 
 		merged.Want = append(merged.Want, ke.Want...)
 	}
 	return merged
+}
+
+// readableLines builds the check for a file from the lines the known_hosts
+// parser can read; the others are left out (and reported once).
+func (k *KnownHosts) readableLines(path string) (ssh.HostKeyCallback, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	lines := strings.Split(string(data), "\n")
+	var bad []string
+	for i, l := range lines {
+		if !LineReadable(l) {
+			bad = append(bad, fmt.Sprint(i+1))
+			lines[i] = "" // keep the line numbers
+		}
+	}
+	tmp, err := os.CreateTemp("", "yacm-known-hosts-*")
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(tmp.Name())
+	_, err = tmp.WriteString(strings.Join(lines, "\n"))
+	if cerr := tmp.Close(); err == nil {
+		err = cerr
+	}
+	if err != nil {
+		return nil, err
+	}
+	cb, err := knownhosts.New(tmp.Name())
+	if err != nil {
+		return nil, err
+	}
+	if len(bad) > 0 && k.Warn != nil {
+		key := path
+		if st, err := os.Stat(path); err == nil {
+			key = fmt.Sprintf("%s|%d|%d", path, st.Size(), st.ModTime().UnixNano())
+		}
+		if k.warned == nil {
+			k.warned = map[string]bool{}
+		}
+		if !k.warned[key] {
+			k.warned[key] = true
+			k.Warn(fmt.Sprintf("%s: line %s cannot be read and is ignored; the other host keys in it are still checked", path, strings.Join(bad, ", ")))
+		}
+	}
+	tmpName := tmp.Name()
+	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+		err := cb(hostname, remote, key)
+		var ke *knownhosts.KeyError
+		if errors.As(err, &ke) {
+			for i := range ke.Want {
+				if ke.Want[i].Filename == tmpName {
+					ke.Want[i].Filename = path
+				}
+			}
+		}
+		return err
+	}, nil
+}
+
+// LineReadable reports whether the known_hosts parser used for the host key
+// check can read line (an empty line or a comment can be read). The parser
+// refuses a whole file for a single host pattern it cannot read, such as
+// "[10.0.0.1]" without a port.
+func LineReadable(line string) bool {
+	t := strings.TrimSpace(line)
+	if t == "" || t[0] == '#' {
+		return true
+	}
+	_, hosts, _, _, _, err := ssh.ParseKnownHosts([]byte(t + "\n"))
+	if err != nil || len(hosts) == 0 {
+		return false
+	}
+	for _, h := range hosts {
+		if strings.HasPrefix(h, "|") {
+			// |1|salt|hash, both base64
+			p := strings.Split(h, "|")
+			if len(p) != 4 || p[1] != "1" {
+				return false
+			}
+			for _, b := range p[2:] {
+				if _, err := base64.StdEncoding.DecodeString(b); err != nil {
+					return false
+				}
+			}
+			continue
+		}
+		h = strings.TrimPrefix(h, "!")
+		if h == "" {
+			return false
+		}
+		if h[0] == '[' {
+			if _, _, err := net.SplitHostPort(h); err != nil {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Callback returns an ssh.HostKeyCallback that consults the files and asks
@@ -433,30 +542,24 @@ func (k *KnownHosts) ImportLines(lines []string) (int, error) {
 		if t == "" || existing[t] || strings.ContainsAny(t, "\r\n") {
 			continue
 		}
-		if _, _, _, _, _, err := ssh.ParseKnownHosts([]byte(t + "\n")); err != nil {
-			continue
+		if !LineReadable(t) {
+			continue // one such line would make the check skip the whole file
 		}
-		// Imported lines name hosts literally: a @cert-authority marker,
-		// hashed names and patterns would reach far beyond the hosts the
-		// lines came with. @revoked only takes trust away and may come along.
+		// Imported lines name hosts literally: markers (@cert-authority,
+		// and @revoked, which could not be removed here), hashed names and
+		// patterns would reach far beyond the hosts the lines came with.
 		f := strings.Fields(t)
-		revoked := f[0] == "@revoked"
-		if revoked {
-			f = f[1:]
-		}
 		if len(f) < 2 || strings.HasPrefix(f[0], "@") || strings.HasPrefix(f[0], "|") || strings.ContainsAny(f[0], "*?!") {
 			continue
 		}
-		if !revoked {
-			skip := false
-			for _, h := range strings.Split(f[0], ",") {
-				if knownHost[normEntry(h)] || trusted[normEntry(h)] {
-					skip = true
-				}
+		skip := false
+		for _, h := range strings.Split(f[0], ",") {
+			if knownHost[normEntry(h)] || trusted[normEntry(h)] {
+				skip = true
 			}
-			if skip {
-				continue
-			}
+		}
+		if skip {
+			continue
 		}
 		existing[t] = true
 		add = append(add, t)
