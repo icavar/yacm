@@ -15,7 +15,7 @@ import (
 	"unicode/utf16"
 	"unicode/utf8"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Kind identifies a foreign configuration format.

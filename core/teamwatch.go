@@ -15,9 +15,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/team"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/team"
 )
 
 // Whoever can write to a team library could point a session at their own

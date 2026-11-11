@@ -6,7 +6,7 @@ Thank you for your interest in contributing to YACM, a project of Ivan Ćavar
 This contributor agreement ("Agreement") documents the rights granted by
 contributors to Us. To make this document effective, please sign it and send
 it to Us by electronic submission, following the instructions at
-https://github.com/icavar/yacm/blob/main/CONTRIBUTING.md (the CLA Assistant
+https://github.com/yacm-app/yacm/blob/main/CONTRIBUTING.md (the CLA Assistant
 asks for your agreement on your first pull request). This is a legally binding
 document, so please read it carefully before agreeing to it. The Agreement may
 cover more than one software project managed by Us.

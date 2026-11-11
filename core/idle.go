@@ -13,9 +13,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/expect"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/expect"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // promptWatch follows the end of a session's output, so YACM knows when the

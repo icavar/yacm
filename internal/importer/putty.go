@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // puttyValues is one saved PuTTY session (registry values or file lines).

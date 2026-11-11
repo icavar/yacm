@@ -13,10 +13,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/vault"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/vault"
 )
 
 // ---- tree ------------------------------------------------------------------

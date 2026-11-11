@@ -14,8 +14,8 @@ import (
 
 	"github.com/goccy/go-yaml"
 
-	"github.com/icavar/yacm/internal/expect"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/expect"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Skip records a connection that was not imported.

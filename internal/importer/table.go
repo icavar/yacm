@@ -15,7 +15,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Spreadsheet import: a CSV file or the first sheet of an Excel workbook

@@ -37,7 +37,9 @@ Every release is built by GitHub Actions in this repository from a commit on
 `main` (`.github/workflows/release.yml`), never on a personal computer. The
 release jobs run only after the maintainer approves them. Each release comes
 with SHA-256 checksums, a software bill of materials and a build provenance
-attestation for every file (`gh attestation verify <file> --repo icavar/yacm`).
+attestation for every file (`gh attestation verify <file> --repo yacm-app/yacm`;
+for releases up to 0.9.2, built before the project moved to the yacm-app
+organisation, `--repo icavar/yacm`).
 
 ## Team roles
 

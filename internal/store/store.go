@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icavar/yacm/internal/jsonx"
+	"github.com/yacm-app/yacm/internal/jsonx"
 )
 
 // schemaVersion 2 added credential profiles, group defaults and colours.

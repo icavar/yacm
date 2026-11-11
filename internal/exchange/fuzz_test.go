@@ -6,7 +6,7 @@ package exchange
 import (
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // A .yacm file can come from anyone: parsing, inspecting and planning its

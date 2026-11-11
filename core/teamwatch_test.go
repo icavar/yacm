@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // A follower is warned before logging in to a team session whose address a

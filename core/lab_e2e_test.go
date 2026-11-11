@@ -29,11 +29,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icavar/yacm/internal/fileserver"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/tunnel"
-	"github.com/icavar/yacm/internal/xfer"
+	"github.com/yacm-app/yacm/internal/fileserver"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/tunnel"
+	"github.com/yacm-app/yacm/internal/xfer"
 )
 
 const (

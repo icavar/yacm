@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Whoever can write to a team library could use <USER> and <PASS> to

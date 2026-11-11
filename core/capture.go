@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icavar/yacm/internal/expect"
+	"github.com/yacm-app/yacm/internal/expect"
 )
 
 // pagerRe matches a pager prompt at the end of the unfinished line.

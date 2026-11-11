@@ -2,6 +2,8 @@
 
 YACM (Yet Another Connection Manager) is a cross-platform SSH, telnet and
 serial connection manager for network engineers. Go + Wails v2 backend, vanilla JavaScript + Vite + xterm.js frontend.
+Repository `github.com/yacm-app/yacm` (organisation `yacm-app`, with the
+Homebrew tap and the apt/dnf repository `yacm-packages`).
 Maintainer: GitHub `icavar`. Licence: GPL-3.0-or-later; it stays free and
 open source. Additional terms under GPLv3 section 7 only (`NOTICE.md`):
 liability disclaimer (7a), forks keep "Based on YACM" with a link in About
@@ -38,7 +40,7 @@ dependencies must be permissively licensed (`tools/licensecheck`).
 
 ## Layout
 
-- Module `github.com/icavar/yacm`. `main.go` only embeds `frontend/dist` and
+- Module `github.com/yacm-app/yacm`. `main.go` only embeds `frontend/dist` and
   calls `core.Main`; the program is package `core` (importable, so other
   builds can start it with their own `main` and `core.Config`):
   `core/run.go` (data folder, log, Wails options), `core/version.go`

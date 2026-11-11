@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icavar/yacm/internal/fakedevice"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/fakedevice"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // runCapture feeds chunks to a capture and returns the file text, what was

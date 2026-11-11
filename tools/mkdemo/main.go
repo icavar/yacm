@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/icavar/yacm/internal/exchange"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/exchange"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 func main() {

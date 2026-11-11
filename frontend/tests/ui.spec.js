@@ -172,7 +172,7 @@ test("no What's new before 1.1, the guide on a fresh install", async ({ page }) 
   await expect(fresh.getByRole('button', { name: 'Import sessions…' })).toBeVisible();
   // The demo is a separate download: without it the guide links to the releases.
   await fresh.getByRole('button', { name: 'Get the demo' }).click();
-  expect(await fresh.evaluate(() => window.__opened)).toEqual(['https://github.com/icavar/yacm/releases']);
+  expect(await fresh.evaluate(() => window.__opened)).toEqual(['https://github.com/yacm-app/yacm/releases']);
   await expect(fresh.getByRole('button', { name: 'Import the demo sessions' })).toHaveCount(0);
   expect(errors).toEqual([]);
 
@@ -1103,7 +1103,7 @@ test('File servers: port 69 can be allowed on Linux, names with spaces, a tunnel
 
 test('the update check is off by default and never offered at start', async ({ page }) => {
   await page.clock.install();
-  const errors = await open(page, { settings: { updateCheck: '' }, update: { current: '0.9.0-rc.1', newer: true, latest: '0.9.0', url: 'https://github.com/icavar/yacm/releases/tag/v0.9.0' } });
+  const errors = await open(page, { settings: { updateCheck: '' }, update: { current: '0.9.0-rc.1', newer: true, latest: '0.9.0', url: 'https://github.com/yacm-app/yacm/releases/tag/v0.9.0' } });
   await page.clock.fastForward(3 * 3600 * 1000);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('.update-toast')).toHaveCount(0);
@@ -1119,12 +1119,12 @@ test('the update check is off by default and never offered at start', async ({ p
 
 test('when switched on, the update check reports a newer version with a download link', async ({ page }) => {
   await page.clock.install();
-  const errors = await open(page, { settings: { updateCheck: 'daily' }, update: { current: '0.9.0-rc.1', newer: true, latest: '0.9.0', url: 'https://github.com/icavar/yacm/releases/tag/v0.9.0' } });
+  const errors = await open(page, { settings: { updateCheck: 'daily' }, update: { current: '0.9.0-rc.1', newer: true, latest: '0.9.0', url: 'https://github.com/yacm-app/yacm/releases/tag/v0.9.0' } });
   await page.clock.fastForward(21000);
   const note = page.locator('.update-toast');
   await expect(note).toContainText('YACM 0.9.0 is out.');
   await note.getByRole('button', { name: 'Download' }).click();
-  expect(await page.evaluate(() => window.__opened)).toEqual(['https://github.com/icavar/yacm/releases/tag/v0.9.0']);
+  expect(await page.evaluate(() => window.__opened)).toEqual(['https://github.com/yacm-app/yacm/releases/tag/v0.9.0']);
   expect(errors).toEqual([]);
 });
 
@@ -1142,7 +1142,7 @@ test('About shows the notices, the licence and terms, support and a manual updat
   await expect(legal.locator('.legal-text')).toContainText('GNU GENERAL PUBLIC LICENSE');
   await legal.getByRole('button', { name: 'Close' }).click();
   await dlg.getByRole('button', { name: 'Support YACM' }).click();
-  expect(await page.evaluate(() => window.__opened)).toEqual(['https://github.com/icavar/yacm#support-yacm']);
+  expect(await page.evaluate(() => window.__opened)).toEqual(['https://github.com/yacm-app/yacm#support-yacm']);
   await dlg.getByRole('button', { name: 'Check for updates' }).click();
   await expect(page.locator('#toasts')).toContainText('is the newest version');
   expect(errors).toEqual([]);

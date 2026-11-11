@@ -11,7 +11,7 @@
 # Never on pull requests: the self-hosted runner must not run code from forks.
 # The runner is registered on a private repository (yacm-dev) only,
 # never on the public one: there the cEOS job tests the public main branch
-# (repository variable YACM_LAB_SOURCE = icavar/yacm), so only code that
+# (repository variable YACM_LAB_SOURCE = yacm-app/yacm), so only code that
 # is merged reaches that computer. The job never runs in a public repository.
 name: Lab
 

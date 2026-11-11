@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // buildLoadNodes makes groups and sessions shaped like a big NOC: sites,

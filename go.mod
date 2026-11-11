@@ -1,4 +1,4 @@
-module github.com/icavar/yacm
+module github.com/yacm-app/yacm
 
 go 1.26.4
 

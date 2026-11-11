@@ -8,10 +8,10 @@ import notice from '../../NOTICE.md?raw';
 import trademarks from '../../TRADEMARKS.md?raw';
 import { h, openDialog, seg } from './ui.js';
 
-export const PROJECT_URL = 'https://github.com/icavar/yacm';
+export const PROJECT_URL = 'https://github.com/yacm-app/yacm';
 // SUPPORT_URL is the README section with every way to support YACM, so the
 // app needs no change when one is added or removed.
-export const SUPPORT_URL = 'https://github.com/icavar/yacm#support-yacm';
+export const SUPPORT_URL = 'https://github.com/yacm-app/yacm#support-yacm';
 
 // The full texts are in THIRD-PARTY-NOTICES.txt in every package (written by
 // tools/licensecheck when the packages are built).

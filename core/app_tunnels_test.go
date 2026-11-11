@@ -18,10 +18,10 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/icavar/yacm/internal/fakedevice"
-	"github.com/icavar/yacm/internal/fileserver"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/tunnel"
+	"github.com/yacm-app/yacm/internal/fakedevice"
+	"github.com/yacm-app/yacm/internal/fileserver"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/tunnel"
 )
 
 func shellDevice(t *testing.T, gateway bool) int {

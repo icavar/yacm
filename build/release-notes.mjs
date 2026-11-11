@@ -19,12 +19,12 @@ if (at >= 0) {
 }
 const rc = version.includes('-rc.');
 // Direct links to the release files: GitHub lists them in one flat list.
-const repo = process.env.GITHUB_REPOSITORY || 'icavar/yacm';
+const repo = process.env.GITHUB_REPOSITORY || 'yacm-app/yacm';
 const link = f => `[${f}](https://github.com/${repo}/releases/download/v${version}/${f})`;
 console.log([
   rc ? `Release candidate of YACM ${num}, for testing.` : `YACM ${num}.`,
   '',
-  ...(num.startsWith('0.9.') ? ['The public beta of YACM. Until 1.0 the releases bring fixes only; the [README](https://github.com/icavar/yacm#readme) lists what YACM does.', ''] : []),
+  ...(num.startsWith('0.9.') ? ['The public beta of YACM. Until 1.0 the releases bring fixes only; the [README](https://github.com/yacm-app/yacm#readme) lists what YACM does.', ''] : []),
   ...(lines.length ? ['## What is new', '', ...lines, ''] : []),
   '## Downloads',
   '',

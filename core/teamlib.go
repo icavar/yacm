@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/team"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/team"
 )
 
 // loadedLib is a followed team library as last read.

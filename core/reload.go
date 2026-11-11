@@ -15,9 +15,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Reload watch: after a reload, reboot or software activation the session

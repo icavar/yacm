@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/exchange"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/exchange"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // The demo file that ships with YACM imports and contains the 0.7 examples.

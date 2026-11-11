@@ -21,7 +21,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/icavar/yacm/internal/xfer"
+	"github.com/yacm-app/yacm/internal/xfer"
 )
 
 type events struct {

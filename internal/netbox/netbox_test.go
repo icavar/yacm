@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 func TestFetchPagesRolesAndVMs(t *testing.T) {

@@ -24,8 +24,8 @@ import (
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // ---- where the data lives -------------------------------------------------------

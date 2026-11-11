@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Highlight rules from a file cannot freeze the window.

@@ -34,7 +34,7 @@ import (
 
 	"golang.org/x/crypto/argon2"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 const (

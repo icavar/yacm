@@ -18,7 +18,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/icavar/yacm/internal/xfer"
+	"github.com/yacm-app/yacm/internal/xfer"
 )
 
 // Total is the pretend size of flash:.

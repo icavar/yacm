@@ -14,10 +14,10 @@ import (
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/importer"
-	"github.com/icavar/yacm/internal/serialconn"
-	"github.com/icavar/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/importer"
+	"github.com/yacm-app/yacm/internal/serialconn"
+	"github.com/yacm-app/yacm/internal/sshconn"
 )
 
 // ---- dialogs & misc ----------------------------------------------------------

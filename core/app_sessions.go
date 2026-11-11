@@ -17,14 +17,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/expect"
-	"github.com/icavar/yacm/internal/localcmd"
-	"github.com/icavar/yacm/internal/logmask"
-	"github.com/icavar/yacm/internal/serialconn"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/telnet"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/expect"
+	"github.com/yacm-app/yacm/internal/localcmd"
+	"github.com/yacm-app/yacm/internal/logmask"
+	"github.com/yacm-app/yacm/internal/serialconn"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/telnet"
 )
 
 // ---- sessions ------------------------------------------------------------------

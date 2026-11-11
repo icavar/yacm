@@ -20,7 +20,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/icavar/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/applog"
 )
 
 const desktopMarker = "X-YACM-Managed=true"

@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/backup"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/backup"
 )
 
 // snapshot makes a backup before a risky operation. A failure is logged and

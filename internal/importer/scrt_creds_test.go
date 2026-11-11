@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // SecureCRT credential sets (Config/Credentials/<title>.ini) become

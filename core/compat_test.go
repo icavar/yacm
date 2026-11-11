@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Sessions and team libraries from a newer YACM: kept and listed, but not

@@ -19,7 +19,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/icavar/yacm/internal/fakedevice"
+	"github.com/yacm-app/yacm/internal/fakedevice"
 )
 
 func sshServer(t *testing.T) *ssh.Client {

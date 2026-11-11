@@ -6,7 +6,7 @@ package core
 import (
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 func TestSessionAddress(t *testing.T) {

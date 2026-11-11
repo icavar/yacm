@@ -10,7 +10,7 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/icavar/yacm/core"
+	"github.com/yacm-app/yacm/core"
 )
 
 //go:embed all:frontend/dist

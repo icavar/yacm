@@ -3,7 +3,7 @@
 
 package store
 
-import "github.com/icavar/yacm/internal/jsonx"
+import "github.com/yacm-app/yacm/internal/jsonx"
 
 // Forward compatibility: every stored type keeps the JSON members it does not
 // know (written by a newer YACM) and writes them back unchanged, so sessions,

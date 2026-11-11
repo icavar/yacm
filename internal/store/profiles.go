@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/jsonx"
+	"github.com/yacm-app/yacm/internal/jsonx"
 )
 
 // ---- credential profiles ------------------------------------------------------

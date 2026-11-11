@@ -1,8 +1,8 @@
 # YACM: Yet Another Connection Manager
 
-[![Latest release](https://img.shields.io/github/v/release/icavar/yacm?include_prereleases&label=release)](https://github.com/icavar/yacm/releases)
-[![CI](https://github.com/icavar/yacm/actions/workflows/ci.yml/badge.svg)](https://github.com/icavar/yacm/actions/workflows/ci.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/icavar/yacm/badge)](https://scorecard.dev/viewer/?uri=github.com/icavar/yacm)
+[![Latest release](https://img.shields.io/github/v/release/yacm-app/yacm?include_prereleases&label=release)](https://github.com/yacm-app/yacm/releases)
+[![CI](https://github.com/yacm-app/yacm/actions/workflows/ci.yml/badge.svg)](https://github.com/yacm-app/yacm/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/yacm-app/yacm/badge)](https://scorecard.dev/viewer/?uri=github.com/yacm-app/yacm)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16463/badge)](https://www.bestpractices.dev/projects/16463)
 [![License: GPL v3+](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)](LICENSE)
 
@@ -14,7 +14,7 @@ thousands with your team. For Windows, macOS and Linux. Website:
 [yacm.app](https://yacm.app).
 
 > **Public beta.** Versions 0.9.x are the public beta: until 1.0 they bring
-> fixes only. Please [report problems](https://github.com/icavar/yacm/issues).
+> fixes only. Please [report problems](https://github.com/yacm-app/yacm/issues).
 
 ![YACM with a session tree, a team library and a Cisco IOS XE session](docs/images/yacm.png)
 
@@ -69,7 +69,7 @@ thousands with your team. For Windows, macOS and Linux. Website:
 
 ## Download
 
-Get the latest version from [Releases](https://github.com/icavar/yacm/releases):
+Get the latest version from [Releases](https://github.com/yacm-app/yacm/releases):
 
 - **Windows** (10 and 11): unpack `yacm-*-windows-x64.zip` (most PCs) or
   `yacm-*-windows-arm64.zip` (Windows on ARM) and start `YACM.exe`. No
@@ -90,7 +90,8 @@ Get the latest version from [Releases](https://github.com/icavar/yacm/releases):
 
 Every release has SHA-256 checksums, a software bill of materials and a
 build provenance attestation for each file
-(`gh attestation verify <file> --repo icavar/yacm`).
+(`gh attestation verify <file> --repo yacm-app/yacm`; up to 0.9.2
+`--repo icavar/yacm`).
 [Code signing policy](docs/code-signing-policy.md): who builds, signs and
 approves releases, and what YACM sends over the network.
 
@@ -190,7 +191,7 @@ hardware, get the separate demo download for your system
 ## Contributing
 
 Ideas and bug reports are welcome as
-[GitHub issues](https://github.com/icavar/yacm/issues); security problems go
+[GitHub issues](https://github.com/yacm-app/yacm/issues); security problems go
 to security@yacm.app ([SECURITY.md](SECURITY.md)). Pull requests are welcome
 too: [CONTRIBUTING.md](CONTRIBUTING.md) describes the rules and the
 Contributor License Agreement.

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/vault"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/vault"
 )
 
 // ---- vault -----------------------------------------------------------------

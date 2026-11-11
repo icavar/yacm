@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Query selects what to read.

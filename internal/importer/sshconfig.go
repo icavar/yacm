@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // OpenSSH client configuration (~/.ssh/config). Every concrete Host alias

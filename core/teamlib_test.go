@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/team"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/team"
 )
 
 func findNode(a *App, name string) *store.Node {

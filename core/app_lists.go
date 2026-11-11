@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/importer"
-	"github.com/icavar/yacm/internal/netbox"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/importer"
+	"github.com/yacm-app/yacm/internal/netbox"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // ---- spreadsheet and NetBox import ----------------------------------------------

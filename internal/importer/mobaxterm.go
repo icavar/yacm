@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // MobaXterm keeps sessions in the [Bookmarks] / [Bookmarks_N] sections of

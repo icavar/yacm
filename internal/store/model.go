@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/icavar/yacm/internal/jsonx"
+	"github.com/yacm-app/yacm/internal/jsonx"
 )
 
 // Protocol is the transport a session uses.

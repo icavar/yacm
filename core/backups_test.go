@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/vault"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/vault"
 )
 
 func TestBackupAndRestore(t *testing.T) {

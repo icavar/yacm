@@ -16,14 +16,14 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/backup"
-	"github.com/icavar/yacm/internal/expect"
-	"github.com/icavar/yacm/internal/fileserver"
-	"github.com/icavar/yacm/internal/logmask"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/vault"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/backup"
+	"github.com/yacm-app/yacm/internal/expect"
+	"github.com/yacm-app/yacm/internal/fileserver"
+	"github.com/yacm-app/yacm/internal/logmask"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/vault"
 )
 
 // conn is what every transport provides.

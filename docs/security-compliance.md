@@ -136,7 +136,7 @@ SCP) and tunnels listen only while the user switches them on.
 - **Releases** are built by GitHub Actions from a tagged commit and come
   with SHA-256 checksums, a software bill of materials (SBOM, SPDX JSON) and
   build provenance attestations (`gh attestation verify <file> --repo
-  icavar/yacm`). The macOS application is signed with an Apple Developer ID
+  yacm-app/yacm`). The macOS application is signed with an Apple Developer ID
   and notarised; signing of the Windows builds is being set up.
 - **Vulnerability handling**: reports go to security@yacm.app or GitHub's
   private vulnerability reporting (SECURITY.md). Reports are answered within

@@ -37,9 +37,9 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/icavar/yacm/internal/fakedevice"
-	"github.com/icavar/yacm/internal/fileserver"
-	"github.com/icavar/yacm/internal/xfer"
+	"github.com/yacm-app/yacm/internal/fakedevice"
+	"github.com/yacm-app/yacm/internal/fileserver"
+	"github.com/yacm-app/yacm/internal/xfer"
 )
 
 const (

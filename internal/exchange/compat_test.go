@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // A .yacm file from a newer YACM imports what this version understands:

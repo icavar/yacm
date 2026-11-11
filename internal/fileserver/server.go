@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/icavar/yacm/internal/xfer"
+	"github.com/yacm-app/yacm/internal/xfer"
 )
 
 // Config is one server's settings.

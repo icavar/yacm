@@ -17,7 +17,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // mRemoteNG confCons.xml (public analysis: errno.fr/mRemoteNG.html,

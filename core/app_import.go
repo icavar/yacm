@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icavar/yacm/internal/exchange"
-	"github.com/icavar/yacm/internal/importer"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/exchange"
+	"github.com/yacm-app/yacm/internal/importer"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // ForeignRequest imports sessions from another program.

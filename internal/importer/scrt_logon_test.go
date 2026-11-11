@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // scrtEncrypt makes a "03:" value the way SecureCRT does (inverse of

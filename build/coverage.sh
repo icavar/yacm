@@ -9,14 +9,14 @@ profile=${1:-coverage.out}
 # Minimum statement coverage (%) per critical package. Raise them as tests
 # are added; a drop below fails CI.
 declare -A floor=(
-  [github.com/icavar/yacm/internal/vault]=75
-  [github.com/icavar/yacm/internal/store]=70
-  [github.com/icavar/yacm/internal/team]=75
-  [github.com/icavar/yacm/internal/exchange]=80
-  [github.com/icavar/yacm/internal/sshconn]=70
-  [github.com/icavar/yacm/internal/importer]=75
-  [github.com/icavar/yacm/internal/logmask]=85
-  [github.com/icavar/yacm/internal/localcmd]=80
+  [github.com/yacm-app/yacm/internal/vault]=75
+  [github.com/yacm-app/yacm/internal/store]=70
+  [github.com/yacm-app/yacm/internal/team]=75
+  [github.com/yacm-app/yacm/internal/exchange]=80
+  [github.com/yacm-app/yacm/internal/sshconn]=70
+  [github.com/yacm-app/yacm/internal/importer]=75
+  [github.com/yacm-app/yacm/internal/logmask]=85
+  [github.com/yacm-app/yacm/internal/localcmd]=80
 )
 
 # With -coverpkg every test binary reports every block: a block counts as
@@ -42,7 +42,7 @@ failed=0
     f=${floor[$pkg]:-}
     mark=""
     if [ -n "$f" ] && awk -v a="$pct" -v b="$f" 'BEGIN { exit !(a < b) }'; then mark=" ❌"; failed=1; fi
-    echo "| ${pkg#github.com/icavar/yacm/} | ${pct}%${mark} | ${f:+$f%} |"
+    echo "| ${pkg#github.com/yacm-app/yacm/} | ${pct}%${mark} | ${f:+$f%} |"
   done <<< "$summary"
 } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
 

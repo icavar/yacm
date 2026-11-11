@@ -16,10 +16,10 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/icavar/yacm/internal/applog"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
-	"github.com/icavar/yacm/internal/tunnel"
+	"github.com/yacm-app/yacm/internal/applog"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/tunnel"
 )
 
 // ---- SSH tunnels (port forwarding) and the outbound proxy --------------------

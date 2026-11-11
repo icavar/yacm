@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // A telnet session behind a jump host: DialTCP opens a forwarded TCP

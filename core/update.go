@@ -23,7 +23,7 @@ import (
 
 // updateRepo is where releases are published. A modified version that
 // publishes its own releases changes this.
-const updateRepo = "icavar/yacm"
+const updateRepo = "yacm-app/yacm"
 
 // UpdateInfo is the answer of CheckForUpdate.
 type UpdateInfo struct {

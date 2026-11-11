@@ -19,9 +19,9 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/icavar/yacm/internal/fakedevice"
-	"github.com/icavar/yacm/internal/sshconn"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/fakedevice"
+	"github.com/yacm-app/yacm/internal/sshconn"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // startFakeDevice runs a pretend device (exec, SCP, jump forwarding).

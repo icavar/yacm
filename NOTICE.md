@@ -2,7 +2,7 @@
 
 YACM (Yet Another Connection Manager)
 Copyright (C) 2026 Ivan Ćavar and the YACM contributors
-https://github.com/icavar/yacm
+https://github.com/yacm-app/yacm
 
 "The YACM Authors" in the source files and in the application means the
 copyright holders named above: Ivan Ćavar and the contributors recorded in
@@ -51,7 +51,7 @@ Modified versions of YACM, and works that contain YACM or a substantial part
 of it, must keep the following notice, with a working link, where they show
 their Appropriate Legal Notices (in YACM: Settings > About):
 
-    Based on YACM – https://github.com/icavar/yacm
+    Based on YACM – https://github.com/yacm-app/yacm
 
 They must also keep the copyright notices in the source files and this file.
 

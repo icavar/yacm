@@ -25,8 +25,8 @@ import (
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 
-	"github.com/icavar/yacm/internal/ppk"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/ppk"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // SecretRequest asks the user for a password or passphrase.

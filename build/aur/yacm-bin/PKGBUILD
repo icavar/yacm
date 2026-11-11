@@ -10,9 +10,9 @@ depends=('gtk3' 'webkit2gtk-4.1')
 provides=('yacm')
 conflicts=('yacm')
 options=('!strip' '!debug')
-source=("https://github.com/icavar/yacm/releases/download/v${pkgver}/yacm-${pkgver}-linux-amd64.tar.gz"
-        "yacm-${pkgver}.svg::https://raw.githubusercontent.com/icavar/yacm/v${pkgver}/build/icon.svg"
-        "yacm-${pkgver}.png::https://raw.githubusercontent.com/icavar/yacm/v${pkgver}/build/appicon-256.png"
+source=("https://github.com/yacm-app/yacm/releases/download/v${pkgver}/yacm-${pkgver}-linux-amd64.tar.gz"
+        "yacm-${pkgver}.svg::https://raw.githubusercontent.com/yacm-app/yacm/v${pkgver}/build/icon.svg"
+        "yacm-${pkgver}.png::https://raw.githubusercontent.com/yacm-app/yacm/v${pkgver}/build/appicon-256.png"
         'yacm.desktop')
 sha256sums=('51d9c030bfd4d7f992fc8b4b6180fbca13bb34ef7ad6ff84627f8e964f8acfe4'
             'dcc2f578a2d29bd5e8b6ab527548d36f371895e11c339c2d203e3ec9a35144de'

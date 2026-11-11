@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // A hand-edited (or malicious) library cannot make YACM run commands, use

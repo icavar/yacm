@@ -15,7 +15,7 @@ import (
 	"go.bug.st/serial"
 	"go.bug.st/serial/enumerator"
 
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 // Conn is an open serial port.

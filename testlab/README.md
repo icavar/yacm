@@ -79,7 +79,7 @@ The Lab workflow (`.github/workflows/lab.yml`):
 It never runs for pull requests, and never in a public repository: the
 self-hosted runner is registered on a **private** repository only, whose
 Lab workflow tests the public `main` branch (repository variable
-`YACM_LAB_SOURCE`, for example `icavar/yacm`). So only code that has been
+`YACM_LAB_SOURCE`, for example `yacm-app/yacm`). So only code that has been
 merged reaches the computer, and nobody can send it code with a pull
 request.
 
@@ -112,10 +112,11 @@ request.
    sudo bash -c 'cd /home/gh-runner/actions-runner && ./svc.sh install gh-runner && ./svc.sh start'
    systemctl list-units 'actions.runner.*'   # the service runs as gh-runner
    ```
-6. On GitHub, in the private repository: Settings > Secrets and variables >
+6. On GitHub, in the private repository (both variables go there, none in
+   the public one): Settings > Secrets and variables >
    Actions > Variables > New repository variable: Name `YACM_CLAB_RUNNER`,
    Value `true` (only the word), and `YACM_LAB_SOURCE` with the public
-   repository (`icavar/yacm`).
+   repository (`yacm-app/yacm`).
 7. Actions > Lab > Run workflow > fabric `ceos`.
 
 The cEOS image is shared through Docker, so the runner user sees it without

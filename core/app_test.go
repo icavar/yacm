@@ -14,9 +14,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icavar/yacm/internal/exchange"
-	"github.com/icavar/yacm/internal/importer"
-	"github.com/icavar/yacm/internal/store"
+	"github.com/yacm-app/yacm/internal/exchange"
+	"github.com/yacm-app/yacm/internal/importer"
+	"github.com/yacm-app/yacm/internal/store"
 )
 
 func sp(s string) *string { return &s }
