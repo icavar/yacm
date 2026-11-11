@@ -21,6 +21,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The new module versions are built and tested below: they never
+          # see a token. Only the last step gets one, to push.
+          persist-credentials: false
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.27.x'
@@ -45,9 +49,10 @@ jobs:
       - name: Push the go-mod-update branch
         env:
           ARGS: ${{ github.event.inputs.args }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b go-mod-update
           git commit -am "go get $ARGS"
-          git push -f origin go-mod-update
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" go-mod-update

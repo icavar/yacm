@@ -71,7 +71,11 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - name: Containerlab
-        run: bash -c "$(curl -sL https://get.containerlab.dev)" -- -v 0.82.0
+        # A fixed release, checked against its checksum (not the install script).
+        run: |
+          curl -fsSLo /tmp/clab.deb https://github.com/srl-labs/containerlab/releases/download/v0.82.0/containerlab_0.82.0_linux_amd64.deb
+          echo "770e18f19ef75732eb9f4e362541f509abb2b6eeadde2d5c98140190b19b519a  /tmp/clab.deb" | sha256sum -c -
+          sudo apt-get install -y /tmp/clab.deb
       - name: Lab and tests
         run: make -C testlab/clab e2e FABRIC=linux CLAB="sudo containerlab"
       - name: Report
