@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX package for the Microsoft Store. build/windows/msix.sh fills in
+  ${VERSION} (four numbers, the last 0 for the Store) and ${ARCH} (x64, arm64).
+  The identity is the one Partner Center gives the product; the Store signs
+  the package.
+
+  YACM keeps its data where the zip version keeps it (%AppData%\YACM, or the
+  folder the user chose), so the two share sessions and the vault and an
+  uninstall does not delete them: hence unvirtualizedResources and file system
+  and registry write virtualization off (Windows 10 2004 and newer).
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap3 desktop desktop6 rescap">
+
+  <Identity
+    Name="TheYACMAuthors.YACM"
+    Publisher="CN=3CBB0E31-4BFA-47A2-A204-2908D73BE057"
+    Version="${VERSION}"
+    ProcessorArchitecture="${ARCH}" />
+
+  <Properties>
+    <DisplayName>YACM</DisplayName>
+    <PublisherDisplayName>The YACM Authors</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Connection manager for SSH, telnet and serial consoles.</Description>
+    <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
+    <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="YACM" Executable="YACM.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="YACM"
+        Description="Connection manager for SSH, telnet and serial consoles"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" ShortName="YACM" />
+      </uap:VisualElements>
+      <Extensions>
+        <uap3:Extension Category="windows.appExecutionAlias" Executable="YACM.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap3:AppExecutionAlias>
+            <desktop:ExecutionAlias Alias="yacm.exe" />
+          </uap3:AppExecutionAlias>
+        </uap3:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>

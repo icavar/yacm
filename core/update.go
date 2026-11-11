@@ -48,6 +48,9 @@ var releasesURL = "https://api.github.com/repos/" + updateRepo + "/releases?per_
 // CheckForUpdate looks for a release newer than this one. Release
 // candidates are offered only to someone running a release candidate.
 func (a *App) CheckForUpdate() (UpdateInfo, error) {
+	if storePackage() != "" {
+		return UpdateInfo{Current: appVersion}, errors.New("YACM from the Microsoft Store is updated by the Store")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	return checkForUpdate(ctx, http.DefaultClient, releasesURL, appVersion)

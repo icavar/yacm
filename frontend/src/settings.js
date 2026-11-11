@@ -138,7 +138,9 @@ export async function openSettings(onApply, startTab) {
   const general = () => [
     h('h3', { text: 'Starting YACM' }),
     check('Reopen the sessions that were open when YACM closed', reopen, 'Tabs, their order and the split view come back; the sessions connect once the vault is unlocked. After a crash YACM offers this even when it is off.'),
-    check('Check for new versions once a day', upd, 'Off unless you switch it on. YACM asks GitHub (api.github.com) whether a newer release is out; only that question is sent, nothing about you or your sessions. YACM never updates itself: a store or package manager (Microsoft Store, Homebrew, winget, Flathub) updates it for you, otherwise download the new version. Settings > About checks by hand.'),
+    about.store
+      ? hint('Updates come from the Microsoft Store.')
+      : check('Check for new versions once a day', upd, 'Off unless you switch it on. YACM asks GitHub (api.github.com) whether a newer release is out; only that question is sent, nothing about you or your sessions. YACM never updates itself: a store or package manager (Microsoft Store, winget, Homebrew, apt, dnf) updates it for you, otherwise download the new version. Settings > About checks by hand.'),
     h('h3', { text: 'Session names', style: { marginTop: '16px' } }),
     h('div', { class: 'field' }, h('span', { text: 'When the device prompt shows a different hostname' }), ren,
       h('span', { class: 'hint', text: 'After login YACM reads the hostname from the prompt (for example core-sw1# ) and offers to use it as the session name, handy after importing devices by IP address.' })),
@@ -309,12 +311,12 @@ export async function openSettings(onApply, startTab) {
       h('p', { text: 'YACM is free and stays free. If you would like it to keep improving and getting new features, you can support its development.' }),
       h('p', { text: 'This program comes with ABSOLUTELY NO WARRANTY. You use it at your own risk: it sends to your devices what you, your saved commands and your rules tell it to. The authors are not liable for any damage, as far as the law allows.' })),
     h('table', { class: 'kh-table' },
-      ...[['YACM', about.app], ['Data folder', about.dataDir], ['Go', about.go], ['golang.org/x/crypto', about.xcrypto], ['Wails', about.wails], ['WebView2 loader', about.webview2]]
+      ...[['YACM', about.app], ['Installed from', about.store ? 'Microsoft Store' : ''], ['Data folder', about.dataDir], ['Go', about.go], ['golang.org/x/crypto', about.xcrypto], ['Wails', about.wails], ['WebView2 loader', about.webview2]]
         .filter(([, v]) => v).map(([k, v]) => h('tr', {}, h('td', { text: k }), h('td', { class: 'fp', text: v })))),
     h('div', { style: { display: 'flex', gap: '8px', marginTop: '10px' } },
       h('button', { type: 'button', class: 'btn small', text: 'Licence and terms', on: { click: showLegal } }),
       h('button', { type: 'button', class: 'btn small', text: 'Support YACM', title: 'Ways to support YACM (GitHub Sponsors, Ko-fi); YACM stays free either way', on: { click: () => runtime.openURL(SUPPORT_URL) } }),
-      h('button', { type: 'button', class: 'btn small', text: 'Check for updates', on: { click: () => checkUpdates(true) } }),
+      about.store ? null : h('button', { type: 'button', class: 'btn small', text: 'Check for updates', on: { click: () => checkUpdates(true) } }),
       whatsNewFor(about.app).length ? h('button', { type: 'button', class: 'btn small', text: 'What’s new', on: { click: async () => { const { showWhatsNew } = await import('./guide.js'); showWhatsNew(about.app); } } }) : null,
       h('button', { type: 'button', class: 'btn small', text: 'Getting started', on: { click: async () => { const { startGuide } = await import('./guide.js'); const info = await api.GetStartInfo(); startGuide(info, async () => { await reload(); window.dispatchEvent(new Event('yacm:tree')); }); } } })),
     h('h3', { text: 'Reporting a problem', style: { marginTop: '16px' } }),

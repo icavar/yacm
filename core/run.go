@@ -46,6 +46,9 @@ func Main(cfg Config) int {
 	}
 	defer applog.Close()
 	applog.Infof("YACM %s starting on %s/%s; data folder %s (%s)", appVersion, runtime.GOOS, runtime.GOARCH, firstNonEmpty(loc.Dir, loc.Wanted, loc.Default), loc.Source)
+	if p := storePackage(); p != "" {
+		applog.Infof("installed from the Microsoft Store (%s)", p)
+	}
 	desktopEntry(cfg.Icon) // Linux: menu entry and dock icon
 	app, err := newAppFor(loc, hasArg(args, "--take-over"))
 	if err != nil {

@@ -3,7 +3,7 @@
 
 // Opt-in update check, off by default and never offered by itself: YACM is
 // updated through the channel it came from (a store, a package manager or a
-// new zip). With "daily", switched on in Settings > General, YACM asks GitHub
+// new zip); a copy from the Microsoft Store never asks. With "daily", switched on in Settings > General, YACM asks GitHub
 // once a day (per computer) whether a newer release is out and says so once
 // per version.
 import { api, state, runtime } from './api.js';
@@ -53,7 +53,9 @@ function notify(info) {
 // initUpdates runs once after start.
 export function initUpdates() {
   const due = () => state.settings.updateCheck === 'daily' && Date.now() - (load().last || 0) > DAY;
-  setTimeout(() => {
+  setTimeout(async () => {
+    const about = /** @type {Record<string, string>} */ (await api.About().catch(() => ({})));
+    if (about.store) return; // the Microsoft Store updates this copy
     if (due()) check(false);
     setInterval(() => { if (due()) check(false); }, 3600 * 1000);
   }, 20000);

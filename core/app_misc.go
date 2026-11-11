@@ -112,6 +112,9 @@ func (a *App) RemoveKnownHost(host string) error { return a.kh.Remove(host) }
 // About returns version information relevant for security reviews.
 func (a *App) About() map[string]string {
 	out := map[string]string{"app": appVersion, "dataDir": a.dataDir}
+	if p := storePackage(); p != "" {
+		out["store"] = p // the Microsoft Store updates this copy
+	}
 	if bi, ok := debug.ReadBuildInfo(); ok {
 		out["go"] = bi.GoVersion
 		for _, d := range bi.Deps {
