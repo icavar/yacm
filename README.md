@@ -77,7 +77,8 @@ Get the latest version from [Releases](https://github.com/icavar/yacm/releases):
   builds are signed (see the [code signing policy](docs/code-signing-policy.md)),
   SmartScreen may ask: *More info > Run anyway*.
 - **macOS** (13 or newer, Apple silicon and Intel): open `YACM-*-macos.dmg`
-  and drag YACM to Applications. The app is signed and notarised.
+  and drag YACM to Applications, or install it with Homebrew:
+  `brew install --cask yacm-app/tap/yacm`. The app is signed and notarised.
 - **Linux** (x64):
   - Ubuntu 22.04+ and Debian 12+: `sudo apt install ./yacm-*-linux-amd64.deb`
   - Fedora and other RPM systems: `sudo dnf install ./yacm-*-linux-amd64.rpm`
