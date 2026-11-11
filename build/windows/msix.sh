@@ -52,10 +52,11 @@ if [ "$1" = bundle ]; then
 	shift 3
 	sdk
 	DIR=$(mktemp -d)
-	trap 'rm -rf "$DIR"' EXIT
+	LOG=$(mktemp)
+	trap 'rm -rf "$DIR" "$LOG"' EXIT
 	cp "$@" "$DIR/"
 	rm -f "$OUT"
-	"$MAKEAPPX" bundle /o /bv "$VERSION" /d "$(cygpath -w "$DIR")" /p "$(cygpath -w "$OUT")" >"$DIR/makeappx.log" || { cat "$DIR/makeappx.log" >&2; exit 1; }
+	"$MAKEAPPX" bundle /o /bv "$VERSION" /d "$(cygpath -w "$DIR")" /p "$(cygpath -w "$OUT")" >"$LOG" || { cat "$LOG" >&2; exit 1; }
 	[ -s "$OUT" ]
 	echo "$OUT: YACM $VERSION, $# packages"
 	exit 0
