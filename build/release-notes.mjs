@@ -3,7 +3,8 @@
 
 // Release notes from the What's new entry of a version (frontend/src/whatsnew.js):
 //   node build/release-notes.mjs 1.1.0-rc.1 > notes.md
-// What's new starts with 1.1; 0.9.x and 1.0.x releases say what they are.
+// Every version from 0.9.2 on has an entry; 0.9.x releases also say they
+// are the public beta.
 import { readFileSync } from 'node:fs';
 
 const version = (process.argv[2] || '').replace(/^v/, '');
@@ -24,8 +25,8 @@ const link = f => `[${f}](https://github.com/${repo}/releases/download/v${versio
 console.log([
   rc ? `Release candidate of YACM ${num}, for testing.` : `YACM ${num}.`,
   '',
-  ...(num.startsWith('0.9.') ? ['The public beta of YACM. Until 1.0 the releases bring fixes only; the [README](https://github.com/yacm-app/yacm#readme) lists what YACM does.', ''] : []),
-  ...(lines.length ? ['## What is new', '', ...lines, ''] : []),
+  ...(num.startsWith('0.9.') ? ['The public beta of YACM: until 1.0 the releases bring fixes and packaging only. The [README](https://github.com/yacm-app/yacm#readme) lists what YACM does.', ''] : []),
+  ...(lines.length ? [num.startsWith('0.') ? '## Changes' : '## What is new', '', ...lines, ''] : []),
   '## Downloads',
   '',
   '| YACM | |',

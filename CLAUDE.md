@@ -147,14 +147,14 @@ Linux desktop builds need `-tags desktop,production,webkit2_41` and
 Bump the version in `core/version.go` (and `wails.json`), run
 `go run ./tools/winres` (it takes the numbers from `core/version.go` for the
 Windows resources; the macOS build does the same), update the README and the
-version line on the website (`docs/index.html`), and push to `main`. What's new (`frontend/src/whatsnew.js`) starts with 1.1:
-from then on each version adds its entry there. Release
+version line on the website (`docs/index.html`), and push to `main`. What's new (`frontend/src/whatsnew.js`): every version from 0.9.2 on adds
+its entry there; it is shown after the update and becomes the release notes. Release
 candidates are `0.9.0-rc.1`, `-rc.2` …: a pre-release for testers; the
 final version drops the suffix. Releases are made from the browser: Actions > Release >
 Run workflow on `main` with the version (`v0.9.0`) builds Windows, Linux
 and macOS packages, the SBOM and (in the public repository) build
 provenance, and a draft GitHub release with notes from What's new on that
-commit (for 0.9.x a fixed beta line); Publish on the Releases page creates the tag, and the run the tag
+commit (for 0.9.x with the beta line); Publish on the Releases page creates the tag, and the run the tag
 starts sees the release and stops (a tag pushed from a computer still
 builds a draft as before). The version must match `core/version.go`. Tags
 cannot be pushed from Claude's sessions (the proxy refuses them).
