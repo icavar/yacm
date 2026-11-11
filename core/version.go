@@ -6,7 +6,7 @@ package core
 // The version is bumped here for a release (see CLAUDE.md, Releases).
 const (
 	appName    = "YACM"
-	appVersion = "0.9.2"
+	appVersion = "0.9.3"
 )
 
 // Version is the YACM version of this build.
