@@ -519,12 +519,20 @@ func (l *Link) MD5(ctx context.Context, p string) (string, error) {
 	})
 }
 
+// plainCLIPath is a path that means the same to a device CLI and to a shell.
+var plainCLIPath = regexp.MustCompile(`^[A-Za-z0-9._/+:@~=,-]+$`)
+
 func md5Cmds(ctx context.Context, p string, exec func(cmd string) (string, error)) (string, error) {
 	var cmds []string
 	if IsDevicePath(p) {
 		cmds = []string{"verify /md5 " + p, "show file " + p + " md5sum"}
 	} else {
-		cmds = []string{"md5sum -- " + quoteSCP(p), "md5 -q " + quoteSCP(p), "file checksum md5 " + p, "verify /md5 file:" + p}
+		cmds = []string{"md5sum -- " + quoteSCP(p), "md5 -q " + quoteSCP(p)}
+		// The Junos and EOS forms cannot be quoted for a shell: on a Linux
+		// server without md5sum they would run there, so only plain paths.
+		if plainCLIPath.MatchString(p) {
+			cmds = append(cmds, "file checksum md5 "+p, "verify /md5 file:"+p)
+		}
 	}
 	var last error
 	for _, cmd := range cmds {

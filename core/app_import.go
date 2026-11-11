@@ -10,6 +10,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -489,9 +490,30 @@ func lookFrom(mine, file store.Settings) store.Settings {
 	out.PasteDelay = file.PasteDelay
 	out.Highlight = file.Highlight
 	if file.HighlightRules != nil {
-		out.HighlightRules = file.HighlightRules
+		out.HighlightRules = safeHighlightRules(file.HighlightRules)
 	}
 	out.AlertSound = file.AlertSound
+	return out
+}
+
+// nestedQuantifier finds a quantified group that holds a quantifier, such
+// as (a+)+ or (.*)*: in JavaScript such a pattern can take minutes on one
+// line of output and freeze the window.
+var nestedQuantifier = regexp.MustCompile(`\([^()]*[+*][^()]*\)(?:[+*]|\{\d*,\})`)
+
+// safeHighlightRules keeps highlight rules from a file only when they are
+// short, few and without nested quantifiers.
+func safeHighlightRules(rules []store.HighlightRule) []store.HighlightRule {
+	var out []store.HighlightRule
+	for _, r := range rules {
+		if len(out) == 200 {
+			break
+		}
+		if len(r.Pattern) > 300 || nestedQuantifier.MatchString(r.Pattern) {
+			continue
+		}
+		out = append(out, r)
+	}
 	return out
 }
 

@@ -64,7 +64,9 @@ Hovering shows each label.
   connect for an address nothing saved has (`admin@10.0.0.1:2222`,
   `telnet://10.1.1.1`, `serial://COM3?baud=9600`), or with several matches
   moves the choice into the tree. A line under the field says which it will
-  be.
+  be. A quick SSH connect uses the *Compatible* algorithm profile (post-quantum
+  key exchange first, SHA-1 key exchange and `ssh-rsa` only if the device
+  offers nothing better), so older gear connects without a saved session.
 - **Go to session** (Ctrl+Shift+O, ⌘O on a Mac) ranks matches among
   thousands of sessions and lists the ones you opened last; Shift+Enter opens
   one next to the current tab.

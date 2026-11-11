@@ -107,7 +107,7 @@ function setupAutoLock() {
       await api.LockVault();
       await refreshLockButton();
       toast('The vault was locked after inactivity.');
-      await lockScreen();
+      await lockScreen({ idle: true });
       await refreshLockButton();
     }
   }, 15000);

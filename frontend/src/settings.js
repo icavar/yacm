@@ -442,8 +442,9 @@ const logoSVG = () => {
   return svg;
 };
 
-// Lock / first-run screen. Resolves when the user is through.
-export function lockScreen() {
+// Lock / first-run screen. Resolves when the user is through. idle: shown by
+// the auto-lock, which locks saved passwords, not the open sessions.
+export function lockScreen({ idle = false } = {}) {
   return new Promise(resolve => {
     const creating = !state.vault.exists;
     const pw = h('input', { type: 'password', autocomplete: creating ? 'new-password' : 'current-password' });
@@ -455,7 +456,9 @@ export function lockScreen() {
       h('h1', {}, logoSVG(), h('span', {}, 'YACM', h('small', { text: 'Yet Another Connection Manager' }))),
       h('p', { text: creating
         ? 'Choose a master password. It encrypts every saved password and passphrase (Argon2id and AES-256-GCM) and is never stored anywhere. If you lose it, the saved passwords cannot be recovered.'
-        : 'Enter your master password to unlock saved passwords.' }),
+        : idle
+          ? 'Saved passwords were locked after inactivity. Open sessions stay connected: lock your computer\'s screen when you leave it. Enter your master password to unlock saved passwords.'
+          : 'Enter your master password to unlock saved passwords.' }),
       field(creating ? 'Master password (at least 12 characters)' : 'Master password', pw),
       creating ? field('Repeat master password', pw2) : null,
       err,
