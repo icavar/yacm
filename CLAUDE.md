@@ -153,7 +153,9 @@ candidates are `0.9.0-rc.1`, `-rc.2` …: a pre-release for testers; the
 final version drops the suffix. Releases are made from the browser: Actions > Release >
 Run workflow on `main` with the version (`v0.9.0`) builds Windows, Linux
 and macOS packages, the SBOM and (in the public repository) build
-provenance, and a draft GitHub release with notes from What's new on that
+provenance, the Microsoft Store bundle (`build/windows/msix.sh` on a Windows
+runner; the run's artifact `store-msix`, uploaded to Partner Center by hand,
+not a release file), and a draft GitHub release with notes from What's new on that
 commit (for 0.9.x with the beta line); Publish on the Releases page creates the tag, and the run the tag
 starts sees the release and stops (a tag pushed from a computer still
 builds a draft as before). The version must match `core/version.go`. Tags
