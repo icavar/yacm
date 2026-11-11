@@ -52,8 +52,10 @@ sheet).
 **Import from NetBox…** needs the address and an API token with read access
 (NetBox 3.x and 4.x; `nbt_` v2 tokens are sent as Bearer tokens). It reads
 devices, and optionally virtual machines, that have a primary IP address,
-filtered by site, role and tag slugs and status. The token can be kept in the
-vault. Imported devices go into a new group whose defaults hold the chosen
+filtered by site, role and tag slugs and status. The address must use
+`https://` (plain `http://` only for NetBox on this computer, so the token
+never crosses the network in clear text). The token can be kept in the
+vault; a kept token is only sent to the address it was saved with. Imported devices go into a new group whose defaults hold the chosen
 credential profile and jump host, so changing the group changes every device.
 
 Both imports can give the new group a credential profile, a jump host and a

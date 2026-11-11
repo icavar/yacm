@@ -105,12 +105,26 @@ func baseURL(raw string) (*url.URL, error) {
 	if err != nil || u.Host == "" {
 		return nil, fmt.Errorf("%q is not a valid address", raw)
 	}
-	if u.Scheme != "https" && u.Scheme != "http" {
+	switch {
+	case u.Scheme == "https":
+	case u.Scheme == "http" && isLoopback(u.Hostname()):
+		// NetBox on this computer: the token stays here.
+	case u.Scheme == "http":
+		return nil, errors.New("use https:// for NetBox: with http:// the API token would cross the network in clear text")
+	default:
 		return nil, errors.New("the address must start with https://")
 	}
 	u.Path = strings.TrimSuffix(strings.TrimSuffix(u.Path, "/"), "/api")
 	u.RawQuery, u.Fragment = "", ""
 	return u, nil
+}
+
+func isLoopback(host string) bool {
+	if strings.EqualFold(host, "localhost") {
+		return true
+	}
+	ip := net.ParseIP(host)
+	return ip != nil && ip.IsLoopback()
 }
 
 func client(q Query) *http.Client {

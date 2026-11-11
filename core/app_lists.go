@@ -192,7 +192,14 @@ type NetBoxPreview struct {
 
 func (a *App) netboxFetch(req *NetBoxRequest) ([]netbox.Device, error) {
 	if strings.TrimSpace(req.Token) == "" {
-		req.Token = a.secret(netboxTokenKey)
+		// The saved token goes only to the address it was saved with.
+		if tok := a.secret(netboxTokenKey); tok != "" {
+			saved := strings.TrimRight(strings.TrimSpace(a.store.Settings().NetBoxURL), "/")
+			if !strings.EqualFold(saved, strings.TrimRight(strings.TrimSpace(req.URL), "/")) {
+				return nil, fmt.Errorf("enter the API token for this address: the saved token is only sent to %s", saved)
+			}
+			req.Token = tok
+		}
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer cancel()

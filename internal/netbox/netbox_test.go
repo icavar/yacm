@@ -105,4 +105,13 @@ func TestAuthHeaderAndBaseURL(t *testing.T) {
 	if _, err := baseURL("ftp://x"); err == nil {
 		t.Fatal("ftp must be refused")
 	}
+	// The token would cross the network in clear text.
+	if _, err := baseURL("http://netbox.example.net"); err == nil {
+		t.Fatal("http to another computer must be refused")
+	}
+	for _, local := range []string{"http://127.0.0.1:8000", "http://localhost/", "http://[::1]:8000"} {
+		if _, err := baseURL(local); err != nil {
+			t.Fatalf("%s: %v", local, err)
+		}
+	}
 }
