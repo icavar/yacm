@@ -255,6 +255,7 @@ func (e *Engine) Stop() {
 // across chunk boundaries.
 type Stripper struct {
 	state int // 0 text, 1 after ESC, 2 CSI, 3 OSC/DCS string, 4 string after ESC
+	cont  int // UTF-8 continuation bytes still expected in text
 }
 
 // Strip returns p without escape sequences and NUL bytes.
@@ -263,13 +264,28 @@ func (s *Stripper) Strip(p []byte) []byte {
 	for _, b := range p {
 		switch s.state {
 		case 0:
+			if s.cont > 0 && b >= 0x80 && b <= 0xbf {
+				// Inside a UTF-8 character (ě is c4 9b): text, never CSI.
+				s.cont--
+				out = append(out, b)
+				continue
+			}
+			s.cont = 0
 			switch {
 			case b == 0x1b:
 				s.state = 1
-			case b == 0x9b: // 8-bit CSI
+			case b == 0x9b: // 8-bit CSI (outside a UTF-8 character)
 				s.state = 2
 			case b == 0 || b == 0x07:
 			default:
+				switch {
+				case b >= 0xc2 && b <= 0xdf:
+					s.cont = 1
+				case b >= 0xe0 && b <= 0xef:
+					s.cont = 2
+				case b >= 0xf0 && b <= 0xf4:
+					s.cont = 3
+				}
 				out = append(out, b)
 			}
 		case 1:

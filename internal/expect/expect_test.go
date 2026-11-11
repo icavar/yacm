@@ -76,6 +76,29 @@ func TestStripper(t *testing.T) {
 	}
 }
 
+// Text whose UTF-8 bytes include 0x9b (ě, ț, ћ, many CJK characters) is
+// kept whole, also split across chunks; a lone 0x9b still starts a CSI.
+func TestStripperUTF8(t *testing.T) {
+	in := "Město ћирилица ț 日本語 end\r\n"
+	var s Stripper
+	if out := string(s.Strip([]byte(in))); out != in {
+		t.Fatalf("%q", out)
+	}
+	var s2 Stripper
+	b := []byte(in)
+	var out []byte
+	for i := range b {
+		out = append(out, s2.Strip(b[i:i+1])...)
+	}
+	if string(out) != in {
+		t.Fatalf("byte by byte: %q", out)
+	}
+	var s3 Stripper
+	if out := string(s3.Strip([]byte("a\x9b1mb"))); out != "ab" {
+		t.Fatalf("8-bit CSI: %q", out)
+	}
+}
+
 // Rules without a pattern send at once: at the start, between waiting
 // rules and at the end.
 func TestSendAtOnce(t *testing.T) {
