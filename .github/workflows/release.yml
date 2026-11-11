@@ -115,6 +115,62 @@ jobs:
             dist/*.rpm
           retention-days: 30
 
+  msix:
+    name: Microsoft Store package
+    needs: [plan, windows-linux]
+    if: needs.plan.outputs.build == 'true'
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: yacm-windows-linux
+          path: in
+      # The two YACM.exe of the zips, each in an MSIX package, and both in
+      # the bundle that is uploaded to Partner Center. Unsigned: the Store
+      # signs it, so it is not a release file.
+      - name: Pack
+        shell: bash
+        run: |
+          V=$(sed -n 's/^[[:space:]]*appVersion = "\(.*\)"/\1/p' core/version.go)
+          mkdir -p store test
+          for a in x64 arm64; do
+            unzip -q "in/yacm-$V-windows-$a.zip" -d in
+            bash build/windows/msix.sh "in/yacm-$V-windows-$a/YACM.exe" "$a" "$V" "test/yacm-$V-$a.msix" "in/yacm-$V-windows-$a/THIRD-PARTY-NOTICES.txt"
+          done
+          bash build/windows/msix.sh bundle "$V" "store/yacm-$V-store.msixbundle" "test/yacm-$V-x64.msix" "test/yacm-$V-arm64.msix"
+          echo "V=$V" >> "$GITHUB_ENV"
+      # Windows must accept the package: the x64 one is signed with a
+      # throwaway certificate for the publisher in the manifest, installed
+      # and removed again.
+      - name: Test install
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $publisher = ([xml](Get-Content build/windows/msix/AppxManifest.xml)).Package.Identity.Publisher
+          $cert = New-SelfSignedCertificate -Type Custom -Subject $publisher -KeyUsage DigitalSignature `
+            -CertStoreLocation Cert:\CurrentUser\My -TextExtension @('2.5.29.37={text}1.3.6.1.5.5.7.3.3', '2.5.29.19={text}')
+          Export-Certificate -Cert $cert -FilePath test/test.cer | Out-Null
+          Import-Certificate -FilePath test/test.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople | Out-Null
+          $signtool = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\signtool.exe' | Sort-Object { [version]$_.Directory.Parent.Name } | Select-Object -Last 1
+          $pkg = "test/yacm-$env:V-x64.msix"
+          & $signtool.FullName sign /fd SHA256 /sha1 $cert.Thumbprint $pkg
+          if ($LASTEXITCODE) { throw "signtool failed" }
+          Add-AppxPackage -Path $pkg
+          $p = Get-AppxPackage -Name TheYACMAuthors.YACM
+          if (-not $p) { throw "the package is not installed" }
+          "$($p.PackageFullName) in $($p.InstallLocation)"
+          foreach ($f in 'YACM.exe', 'resources.pri', 'AppxManifest.xml') {
+            if (-not (Test-Path (Join-Path $p.InstallLocation $f))) { throw "$f is missing from the package" }
+          }
+          Remove-AppxPackage -Package $p.PackageFullName
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: store-msix
+          path: store/*.msixbundle
+          retention-days: 30
+
   macos:
     name: macOS disk image and demo
     needs: plan
@@ -185,7 +241,7 @@ jobs:
   publish:
     name: Draft GitHub release
     if: needs.plan.outputs.release != ''
-    needs: [plan, windows-linux, macos]
+    needs: [plan, windows-linux, msix, macos]
     environment: release
     runs-on: ubuntu-24.04
     permissions:
@@ -196,8 +252,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # The yacm-* artifacts are the release files; the Store package
+      # (store-msix) goes to Partner Center instead.
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
+          pattern: yacm-*
           path: out
           merge-multiple: true
       # Software bill of materials: the Go modules and npm packages in the
