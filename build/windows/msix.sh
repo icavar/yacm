@@ -81,7 +81,7 @@ MINGW* | MSYS* | CYGWIN*)
 	sdk
 	W=$(cygpath -w "$DIR")
 	CF=$(cygpath -w "$WORK/priconfig.xml")
-	"$MAKEPRI" createconfig /cf "$CF" /dl en-US /pv 10.0.0 /o >/dev/null
+	"$MAKEPRI" createconfig /cf "$CF" /dq en-US /pv 10.0.0 /o >/dev/null
 	# One package holds every scale: without this part makepri would
 	# write a separate resource file for each.
 	sed -i '/<packaging>/,/<\/packaging>/d' "$WORK/priconfig.xml"
