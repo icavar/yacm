@@ -3,7 +3,7 @@
 
 // Release notes from the What's new entry of a version (frontend/src/whatsnew.js):
 //   node build/release-notes.mjs 1.1.0-rc.1 > notes.md
-// Every version from 0.9.2 on has an entry; 0.9.x releases also say they
+// Every version from 0.9.1 on has an entry; 0.9.x releases also say they
 // are the public beta.
 import { readFileSync } from 'node:fs';
 

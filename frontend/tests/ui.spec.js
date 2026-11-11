@@ -158,7 +158,7 @@ test("What's new after an update lists the versions since the last one", async (
   expect(errors).toEqual([]);
 });
 
-test("no What's new before 0.9.2, the guide on a fresh install", async ({ page }) => {
+test("no What's new before 0.9.1, the guide on a fresh install", async ({ page }) => {
   let errors = await open(page, { version: '0.9.0', settings: { lastSeenVersion: '0.8.11' } });
   await expect(page.locator('#tree .row').first()).toBeVisible();
   await expect(page.getByText("What's new in YACM")).toHaveCount(0);

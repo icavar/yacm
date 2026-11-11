@@ -3,7 +3,7 @@
 
 // What's new, shown once after an update and from Settings > About, and the
 // changes in the release notes (build/release-notes.mjs). Every version from
-// 0.9.2 on has an entry. Newest first; short, user-facing lines, the user
+// 0.9.1 on has an entry. Newest first; short, user-facing lines, the user
 // guide has the details:
 //   { version: '1.1.0', items: [['Title', 'One or two sentences.'], …] },
 export const WHATS_NEW = [
@@ -24,6 +24,18 @@ export const WHATS_NEW = [
       ['File servers', 'Uploads are limited (16 GiB, at least 1 GiB of free space kept); stopping the SCP server also ends its open connections.'],
       ['NetBox', 'Only https (http just for this computer); the saved token goes only to the address it was saved for.'],
       ['Third-party licences', 'In every package and in Settings > About.'],
+    ],
+  },
+  {
+    version: '0.9.1',
+    items: [
+      ['File transfers', 'A transfer started from a terminal tab goes on when the device logs the terminal out, and shows its speed and the time left. An SCP transfer that Cisco IOS closes as it starts is tried again.'],
+      ['SecureCRT import', 'Credential sets are found also when you import a folder inside Sessions.'],
+      ['Terminal', 'Shift+Insert pastes once; Ctrl+Shift+Tab goes to the previous tab on Linux too.'],
+      ['Session logs', 'The SNMP community in snmp-server host and a server key given without a type are masked.'],
+      ['Vault backups', 'After a master password change the backups are encrypted with the new password, so the old one opens none of them.'],
+      ['File servers', 'The TFTP server takes at most 32 transfers at a time.'],
+      ['Releases', 'Every release has its build provenance attached as a file, for checking the packages offline.'],
     ],
   },
 ];
