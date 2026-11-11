@@ -45,8 +45,12 @@ cp build/demo/README-DEMO.txt "$DW/"
 sed 's/yacm-demo-device\.exe/yacm-demo-device/g; s/Start it by double-clicking; close its window (or press Ctrl+C) to stop\./Start it in a terminal (.\/yacm-demo-device); press Ctrl+C to stop./' \
 	build/demo/README-DEMO.txt >"$DL/README-DEMO.txt"
 
-for d in "$WX" "$WA" "$L"; do cp README.md LICENSE NOTICE.md "$d/"; done
-for d in "$DW" "$DL"; do cp LICENSE NOTICE.md "$d/"; done
+# The licence texts of the Go modules and npm packages built in (needs
+# frontend/node_modules from npm ci).
+go run ./tools/licensecheck -notices "$OUT/THIRD-PARTY-NOTICES.txt" >/dev/null
+for d in "$WX" "$WA" "$L"; do cp README.md LICENSE NOTICE.md "$OUT/THIRD-PARTY-NOTICES.txt" "$d/"; done
+for d in "$DW" "$DL"; do cp LICENSE NOTICE.md "$OUT/THIRD-PARTY-NOTICES.txt" "$d/"; done
+rm "$OUT/THIRD-PARTY-NOTICES.txt"
 
 (cd "$WX" && sha256sum YACM.exe >SHA256SUMS.txt)
 (cd "$WA" && sha256sum YACM.exe >SHA256SUMS.txt)

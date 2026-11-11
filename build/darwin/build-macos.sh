@@ -101,14 +101,15 @@ echo "4/5 Demo download"
 go run ./tools/mkdemo "$DEMO/demo.yacm"
 sed 's/yacm-demo-device\.exe/yacm-demo-device/g; s/Start it by double-clicking; close its window (or press Ctrl+C) to stop\./Start it in Terminal (.\/yacm-demo-device); press Ctrl+C to stop./' \
 	build/demo/README-DEMO.txt >"$DEMO/README-DEMO.txt"
-cp LICENSE NOTICE.md "$DEMO/"
+go run ./tools/licensecheck -notices "$OUT/THIRD-PARTY-NOTICES.txt" >/dev/null
+cp LICENSE NOTICE.md "$OUT/THIRD-PARTY-NOTICES.txt" "$DEMO/"
 (cd "$DEMO" && shasum -a 256 yacm-demo-device demo.yacm >SHA256SUMS.txt)
 DEMOZIP="$OUT/yacm-demo-device-$VERSION-macos.zip"
 ditto -c -k --keepParent "$DEMO" "$DEMOZIP"
 
 echo "5/5 Disk image"
 cp -R "$APP" "$STAGE/"
-cp README.md LICENSE NOTICE.md "$STAGE/"
+cp README.md LICENSE NOTICE.md "$OUT/THIRD-PARTY-NOTICES.txt" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 DMG="$OUT/YACM-$VERSION-macos.dmg"
 hdiutil create -volname "YACM $VERSION" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
