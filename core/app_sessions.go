@@ -986,6 +986,6 @@ func (a *App) LogNamePreview(tmpl string) string {
 	if strings.TrimSpace(tmpl) == "" {
 		tmpl = store.DefaultLogNameTemplate
 	}
-	return store.LogFileName(tmpl, store.LogNameValues{Name: "core-sw1", Host: "10.0.0.1", Protocol: "ssh", User: "ivan",
+	return store.LogFileName(tmpl, store.LogNameValues{Name: "core-sw1", Host: "10.0.0.1", Protocol: "ssh", User: "admin",
 		Group: "Zagreb", Path: "DC/Zagreb", Ticket: "CHG0012345", Time: time.Now()})
 }

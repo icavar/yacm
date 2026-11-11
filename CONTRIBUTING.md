@@ -59,10 +59,21 @@ it in a comment on the pull request. In short:
 - your contribution always stays available under the licence YACM uses on
   the day you contribute (CLA section 2.3), so YACM stays free and open;
 - if you contribute as part of your job, your employer agrees to it
-  (CLA section 3c).
+  (CLA section 3c): either in writing, or by signing the Entity Contributor
+  License Agreement (CLA-ENTITY.md) and sending it to support@yacm.app.
 
-The CLA text is the Harmony agreement, a standard template, unchanged except
-for the names.
+Both agreements are based on the Harmony agreements (HA-CLA-I-ANY and
+HA-CLA-E-ANY), standard templates; YACM's names, the governing law (Croatia)
+and a section on signing were filled in or added.
+
+## Work made with AI assistants
+
+Much of YACM is written by its maintainer with an AI coding assistant
+(Claude, by Anthropic), under the maintainer's direction and review. Commits
+made that way may name the assistant as author or co-author; they are the
+maintainer's work, and the maintainer holds whatever rights exist in them.
+Contributors may use such tools too: you are responsible for what you submit,
+as for any other contribution, and the CLA applies to it in the same way.
 
 New source files start with the same two lines as the others:
 

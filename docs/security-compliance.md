@@ -120,11 +120,13 @@ SCP) and tunnels listen only while the user switches them on.
 
 ## How YACM is developed and released
 
-- **Source code** is public (GPL-3.0-or-later); every change is reviewed in
-  the repository history.
+- **Source code** is public (GPL-3.0-or-later); every change is recorded in
+  the public repository history, and changes from other contributors are
+  reviewed before they are merged.
 - **Continuous integration** on Linux, Windows and macOS: unit, UI and
   end-to-end tests (including a container lab with jump hosts and network
-  devices), the race detector, fuzzing of every parser, `govulncheck` for
+  devices), the race detector, fuzzing of the file importers, the `.yacm`
+  and team library formats, PuTTY keys and the log masking, `govulncheck` for
   known vulnerabilities in Go code and modules, `npm audit` for the
   frontend, and a licence check of all dependencies.
 - **Dependencies** are updated through Dependabot with a cool-down period;

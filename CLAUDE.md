@@ -7,7 +7,8 @@ open source. Additional terms under GPLv3 section 7 only (`NOTICE.md`):
 liability disclaimer (7a), forks keep "Based on YACM" with a link in About
 (7b), say they are modified and use another name (7c), no endorsement with
 the authors' names (7d), no rights to the name or logo (7e, `TRADEMARKS.md`).
-Nothing beyond section 7. Contributions need the CLA (`CLA.md`, Harmony).
+Nothing beyond section 7. Contributions need the CLA (`CLA.md`; for employers
+`CLA-ENTITY.md`; both Harmony).
 Privacy: the maintainer's full name appears only in the copyright line of
 `NOTICE.md` and as the party in `CLA.md`; elsewhere "The YACM Authors" or the
 project link, contact `support@yacm.app`. Every Go and JavaScript source file
@@ -143,8 +144,8 @@ Linux desktop builds need `-tags desktop,production,webkit2_41` and
 
 Bump the version in `core/version.go` (and `wails.json`), run
 `go run ./tools/winres` (it takes the numbers from `core/version.go` for the
-Windows resources; the macOS build does the same), update the README, and
-push to `main`. What's new (`frontend/src/whatsnew.js`) starts with 1.1:
+Windows resources; the macOS build does the same), update the README and the
+version line on the website (`docs/index.html`), and push to `main`. What's new (`frontend/src/whatsnew.js`) starts with 1.1:
 from then on each version adds its entry there. Release
 candidates are `0.9.0-rc.1`, `-rc.2` …: a pre-release for testers; the
 final version drops the suffix. Releases are made from the browser: Actions > Release >

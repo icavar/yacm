@@ -383,10 +383,10 @@ vault (`vault.json`), trusted host keys (`known_hosts`) and session logs
   connections and imports, errors and crashes, never passwords or session
   contents. Settings > About > *Copy diagnostics* puts versions, a few
   settings and the end of the log on the clipboard for a bug report.
-- **Updates**: YACM never updates itself. Installed from a store or a
-  package manager (Microsoft Store, Homebrew, winget, Flathub), it is updated
-  there; the zip and tar.gz versions are replaced with the new download, and
-  the data folder stays as it is. An update check that asks GitHub once a day
+- **Updates**: YACM never updates itself. Installed with Homebrew
+  (`brew install --cask icavar/tap/yacm`), it is updated there; the zip and
+  tar.gz versions are replaced with the new download, and the data folder
+  stays as it is. An update check that asks GitHub once a day
   whether a newer version is out is off by default and only switched on in
   Settings > General; only that question is sent. Settings > About checks by
   hand.

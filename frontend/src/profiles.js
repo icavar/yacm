@@ -52,7 +52,7 @@ export function editProfile(c, after, preset = {}) {
   const vaultOK = state.vault.unlocked;
   const name = h('input', { type: 'text', value: p.name, spellcheck: false, placeholder: 'AD account' });
   const desc = h('input', { type: 'text', value: p.description || '' });
-  const user = h('input', { type: 'text', value: p.user || '', spellcheck: false, placeholder: 'ivan.horvat' });
+  const user = h('input', { type: 'text', value: p.user || '', spellcheck: false, placeholder: 'j.smith' });
   const methodBox = h('div');
   const reveal = kind => master => api.RevealSecret('', kind, p.id, master);
   const renderMethod = () => {
