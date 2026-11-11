@@ -221,6 +221,13 @@ func (s *TFTP) transfer(req *tftpRequest, peer *net.UDPAddr, in chan []byte) {
 		return
 	}
 	ev.File = displayName(s.cfg.Folder, path)
+	var limit int64
+	if upload {
+		if limit, err = s.cfg.uploadLimit(); err != nil {
+			fail(errDiskFull, err.Error())
+			return
+		}
+	}
 	blk := defaultBlock
 	timeout := tftpTimeout
 	var opts [][2]string
@@ -254,8 +261,8 @@ func (s *TFTP) transfer(req *tftpRequest, peer *net.UDPAddr, in chan []byte) {
 			if upload {
 				if n, err := strconv.ParseInt(v, 10, 64); err == nil {
 					size = n
-					if s.cfg.MaxUpload > 0 && n > s.cfg.MaxUpload {
-						fail(errDiskFull, "file too large")
+					if limit > 0 && n > limit {
+						fail(errDiskFull, tooLarge(limit).Error())
 						return
 					}
 				}
@@ -270,7 +277,7 @@ func (s *TFTP) transfer(req *tftpRequest, peer *net.UDPAddr, in chan []byte) {
 	t := &tftpConn{c: c, in: in, peer: peer, timeout: timeout, quit: s.quit}
 	var n int64
 	if upload {
-		n, err = t.receive(path, blk, opts, func(done int64) { ev.Done = done; ev.State = "progress"; s.cfg.emitProgress(ev) })
+		n, err = t.receive(path, blk, limit, opts, func(done int64) { ev.Done = done; ev.State = "progress"; s.cfg.emitProgress(ev) })
 	} else {
 		n, err = t.send(path, blk, opts, func(done int64) { ev.Done = done; ev.State = "progress"; s.cfg.emitProgress(ev) })
 	}
@@ -407,7 +414,7 @@ func (t *tftpConn) send(path string, blk int, opts [][2]string, tick func(int64)
 	}
 }
 
-func (t *tftpConn) receive(path string, blk int, opts [][2]string, tick func(int64)) (int64, error) {
+func (t *tftpConn) receive(path string, blk int, limit int64, opts [][2]string, tick func(int64)) (int64, error) {
 	tmp := path + ".part"
 	f, err := os.OpenFile(tmp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
@@ -447,6 +454,11 @@ func (t *tftpConn) receive(path string, blk int, opts [][2]string, tick func(int
 			return got, err
 		}
 		payload := p[4:]
+		if limit > 0 && got+int64(len(payload)) > limit {
+			err := tooLarge(limit)
+			_, _ = t.c.WriteToUDP(errorPacket(errDiskFull, err.Error()), t.peer)
+			return got, err
+		}
 		if _, err := f.Write(payload); err != nil {
 			_, _ = t.c.WriteToUDP(errorPacket(errDiskFull, "disk full or write error"), t.peer)
 			return got, err

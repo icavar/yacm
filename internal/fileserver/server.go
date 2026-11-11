@@ -33,7 +33,8 @@ type Config struct {
 	// SCP login (the password is generated when empty).
 	User     string `json:"user"`
 	Password string `json:"password"`
-	// MaxUpload refuses larger uploads (0: no limit).
+	// MaxUpload refuses larger uploads (0: DefaultMaxUpload). Uploads also
+	// always leave some disk space free.
 	MaxUpload int64 `json:"-"`
 	// Allow lists the addresses or networks (10.1.0.0/16) that may use the
 	// server; empty allows everyone.
@@ -226,6 +227,9 @@ func (m *Manager) Start(cfg Config) (Status, error) {
 		return Status{}, err
 	}
 	cfg.allow = allow
+	if cfg.MaxUpload <= 0 {
+		cfg.MaxUpload = DefaultMaxUpload
+	}
 	m.Stop(cfg.Kind)
 	cfg.events = m.events
 	kind := cfg.Kind

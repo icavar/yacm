@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -32,6 +33,10 @@ type SCP struct {
 	cfg    Config
 	ln     net.Listener
 	signer []ssh.Signer
+
+	mu     sync.Mutex
+	conns  map[*ssh.ServerConn]bool // logged-in devices, closed by Close
+	closed bool
 }
 
 func randomPassword() string {
@@ -103,8 +108,18 @@ func (s *SCP) Port() int { return s.ln.Addr().(*net.TCPAddr).Port }
 // Fingerprint is the SHA256 fingerprint of the Ed25519 host key.
 func (s *SCP) Fingerprint() string { return ssh.FingerprintSHA256(s.signer[0].PublicKey()) }
 
-// Close stops accepting connections.
-func (s *SCP) Close() error { return s.ln.Close() }
+// Close stops the server: no new connections, and the devices that are
+// logged in are disconnected.
+func (s *SCP) Close() error {
+	err := s.ln.Close()
+	s.mu.Lock()
+	s.closed = true
+	for c := range s.conns {
+		c.Close()
+	}
+	s.mu.Unlock()
+	return err
+}
 
 func (s *SCP) config() *ssh.ServerConfig {
 	sup, ins := ssh.SupportedAlgorithms(), ssh.InsecureAlgorithms()
@@ -163,6 +178,21 @@ func (s *SCP) conn(nc net.Conn, cfg *ssh.ServerConfig) {
 	}
 	_ = nc.SetDeadline(time.Time{})
 	defer sc.Close()
+	s.mu.Lock()
+	if s.closed {
+		s.mu.Unlock()
+		return
+	}
+	if s.conns == nil {
+		s.conns = map[*ssh.ServerConn]bool{}
+	}
+	s.conns[sc] = true
+	s.mu.Unlock()
+	defer func() {
+		s.mu.Lock()
+		delete(s.conns, sc)
+		s.mu.Unlock()
+	}()
 	go ssh.DiscardRequests(reqs)
 	remote, _, _ := net.SplitHostPort(nc.RemoteAddr().String())
 	for nch := range chans {
@@ -213,11 +243,15 @@ func (s *SCP) session(ch ssh.Channel, reqs <-chan *ssh.Request, remote string) {
 }
 
 func (s *SCP) handler(remote string) xfer.SCPHandler {
+	limit, lerr := s.cfg.uploadLimit()
 	return xfer.SCPHandler{
-		MaxSize: s.cfg.MaxUpload,
+		MaxSize: limit,
 		Resolve: func(p, name string, write bool) (string, error) {
 			if write && !s.cfg.AllowUpload {
 				return "", errors.New("uploads are off on this server")
+			}
+			if write && lerr != nil {
+				return "", lerr
 			}
 			full, err := xfer.InRoot(s.cfg.Folder, p, name)
 			if err != nil {

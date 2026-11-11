@@ -5,7 +5,6 @@ package fileserver
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"html"
 	"io"
@@ -187,6 +186,15 @@ func (s *HTTP) put(w http.ResponseWriter, r *http.Request, remote, p string) {
 		http.Error(w, "file already exists", http.StatusConflict)
 		return
 	}
+	limit, err := s.cfg.uploadLimit()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInsufficientStorage)
+		return
+	}
+	if limit > 0 && r.ContentLength > limit {
+		http.Error(w, tooLarge(limit).Error(), http.StatusRequestEntityTooLarge)
+		return
+	}
 	ev := Event{Kind: "http", Remote: remote, File: displayName(s.cfg.Folder, full), Upload: true, Total: r.ContentLength, State: "start"}
 	s.cfg.emit(ev)
 	tmp := full + ".part"
@@ -196,8 +204,8 @@ func (s *HTTP) put(w http.ResponseWriter, r *http.Request, remote, p string) {
 		return
 	}
 	var body io.Reader = r.Body
-	if s.cfg.MaxUpload > 0 {
-		body = io.LimitReader(r.Body, s.cfg.MaxUpload+1)
+	if limit > 0 {
+		body = io.LimitReader(r.Body, limit+1)
 	}
 	pw := &progressWriter{w: f, tick: func(n int64) { ev.Done, ev.State = n, "progress"; s.cfg.emitProgress(ev) }}
 	_, err = io.Copy(pw, body)
@@ -205,8 +213,8 @@ func (s *HTTP) put(w http.ResponseWriter, r *http.Request, remote, p string) {
 	if err == nil {
 		err = cerr
 	}
-	if err == nil && s.cfg.MaxUpload > 0 && pw.n > s.cfg.MaxUpload {
-		err = errors.New("file too large")
+	if err == nil && limit > 0 && pw.n > limit {
+		err = tooLarge(limit)
 	}
 	if err == nil && r.ContentLength > 0 && pw.n != r.ContentLength {
 		err = fmt.Errorf("got %d of %d bytes", pw.n, r.ContentLength)

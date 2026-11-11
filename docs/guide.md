@@ -181,7 +181,9 @@ Hovering shows each label.
   default its own, *YACM file servers* in Downloads, never Downloads or the
   home folder itself), with uploads and HTTP folder listing off until you
   switch them on, allowed device addresses, a generated SCP password and
-  switching off after 15 minutes without transfers.
+  switching off after 15 minutes without transfers. An upload may be at most
+  16 GB and always leaves 1 GB free on the disk; stopping a server also
+  disconnects devices that are logged in to it.
   - The **command helper** writes the copy command for Cisco IOS / IOS XE,
     NX-OS and IOS XR, Arista EOS, Juniper Junos or Linux with the address the
     device reaches, and types it into the session in front (or another

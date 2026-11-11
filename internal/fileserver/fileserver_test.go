@@ -203,6 +203,18 @@ func TestHTTP(t *testing.T) {
 	if resp, _ := http.DefaultClient.Do(req); resp.StatusCode != http.StatusConflict {
 		t.Fatalf("overwrite: %s", resp.Status)
 	}
+	// An upload larger than the limit is refused and leaves nothing behind.
+	m.Stop("http")
+	if _, err := m.Start(Config{Kind: "http", Folder: dir, Bind: "127.0.0.1", Port: port, AllowUpload: true, MaxUpload: 1000}); err != nil {
+		t.Fatal(err)
+	}
+	req, _ = http.NewRequest(http.MethodPut, base+"/big.bin", bytes.NewReader(data(5000)))
+	if resp, err := http.DefaultClient.Do(req); err != nil || resp.StatusCode != http.StatusRequestEntityTooLarge {
+		t.Fatalf("large upload: %v %v", resp, err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "big.bin")); err == nil {
+		t.Fatal("large upload kept")
+	}
 	if resp, _ := http.Get(base + "/../../etc/passwd"); resp.StatusCode == http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
 		if strings.Contains(string(b), "root:") {
@@ -257,6 +269,17 @@ func TestSCPServer(t *testing.T) {
 			t.Fatal("escaped the folder")
 		}
 	}
+	// Stopping the server disconnects a device that is logged in.
+	defer func() {
+		m.Stop("scp")
+		done := make(chan error, 1)
+		go func() { done <- c.Wait() }()
+		select {
+		case <-done:
+		case <-time.After(5 * time.Second):
+			t.Error("a logged-in connection stayed open after Stop")
+		}
+	}()
 	// No shell, no other commands.
 	if out, err := xfer.Exec(ctx, c, "id", 5*time.Second); err == nil && strings.Contains(out, "uid=") {
 		t.Fatal("ran a command")
