@@ -9,6 +9,9 @@ name: Release
 # A tag pushed from a computer still works as before: packages and a draft.
 # Every run also builds the Microsoft Store bundle (artifact store-msix),
 # which is uploaded to Partner Center by hand.
+# In a private copy (yacm-dev) it builds the Windows and Linux packages only:
+# no macOS (its minutes count ten times) and no release, which comes from the
+# public repository.
 
 on:
   push:
@@ -176,7 +179,7 @@ jobs:
   macos:
     name: macOS disk image and demo
     needs: plan
-    if: needs.plan.outputs.build == 'true'
+    if: needs.plan.outputs.build == 'true' && !github.event.repository.private
     # The Apple signing secrets live in the environment "release", which
     # only the maintainer can approve (Settings > Environments).
     environment: release
@@ -242,7 +245,7 @@ jobs:
 
   publish:
     name: Draft GitHub release
-    if: needs.plan.outputs.release != ''
+    if: needs.plan.outputs.release != '' && !github.event.repository.private
     needs: [plan, windows-linux, msix, macos]
     environment: release
     runs-on: ubuntu-24.04
