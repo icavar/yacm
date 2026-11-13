@@ -392,9 +392,13 @@ func TestDeviceNameAndSpaceAlias(t *testing.T) {
 	if got := xfer.SpaceAlias(filepath.Join(dir, "real_name.txt")); got != filepath.Join(dir, "real_name.txt") {
 		t.Errorf("an existing file changed to %q", got)
 	}
-	// Two candidates: no guess.
-	_ = os.WriteFile(filepath.Join(dir, "a b.txt"), nil, 0o644)
-	_ = os.WriteFile(filepath.Join(dir, "a\tb.txt"), nil, 0o644)
+	// Two candidates: no guess. The second has a no-break space, which
+	// every file system allows (Windows refuses a tab in a name).
+	for _, n := range []string{"a b.txt", "a\u00a0b.txt"} {
+		if err := os.WriteFile(filepath.Join(dir, n), nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	if got := xfer.SpaceAlias(filepath.Join(dir, "a_b.txt")); got != filepath.Join(dir, "a_b.txt") {
 		t.Errorf("ambiguous alias = %q", got)
 	}
