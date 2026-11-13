@@ -616,7 +616,7 @@ export async function editSession(node, parentId = '', startSection = '') {
       check('Start every line with the date and time', stamp, 'Like [2026-10-22 13:35:01] show ip interface brief. Only in the log file, not on screen.'),
       h('label', { class: 'field mono' }, h('span', { text: 'Log folder' }), h('div', { class: 'with-btn' }, dir, h('button', { type: 'button', class: 'btn small', text: 'Browse', on: { click: async () => { const p = await api.ChooseDirectory('Log folder'); if (p) { dir.value = p; s.logDir = p; } } } }))),
       state.settings.logNameTemplateOn && state.settings.logNameOwn
-        ? field('Log file name template', h('input', { type: 'text', value: s.logName || '', spellcheck: false, class: 'mono-input', placeholder: 'Empty: the group’s or the one in Settings', on: { input: e => (s.logName = e.target.value) } }), 'Tokens: {name} {host} {protocol} {user} {group} {path} {date} {time} {ticket}; “/” starts a subfolder.')
+        ? field('Log file name template', h('input', { type: 'text', value: s.logName || '', spellcheck: false, class: 'mono-input', placeholder: 'Empty: the group’s or the one in Settings', on: { input: e => (s.logName = e.target.value) } }), 'Tokens: {name} {host} {protocol} {user} {group} {path} {date} {time} {stamp} {ticket}; {stamp} is 20261113-103743; “/” starts a subfolder.')
         : null,
       h('h3', { text: 'Terminal', style: { marginTop: '18px' } }),
       h('div', { class: 'field' }, h('span', { text: 'Tab colour' }), color, h('span', { class: 'hint', text: 'For example red for production, so a reload never goes to the wrong device. “From group” uses the group’s colour.' })),

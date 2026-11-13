@@ -270,9 +270,12 @@ Hovering shows each label.
   of every line. New and imported sessions log by default (Settings > Session
   logs); a log is never overwritten.
 - **File names from a template**: `{group}/{name}_{date}_{time}.log`, with
-  `{host}`, `{user}`, `{protocol}`, `{path}` (one folder per group) and
-  `{ticket}`, optionally per group or session. Log files end in `.log` or
-  `.txt`; any other ending gets `.log` added.
+  `{host}`, `{user}`, `{protocol}`, `{path}` (one folder per group),
+  `{stamp}` (date and time without dashes, `20261113-103743`) and `{ticket}`,
+  optionally per group or session. Without a template a log is named
+  `{name}_{stamp}.log`; the template `{name}_{stamp}.txt` keeps that name with
+  a `.txt` ending. Log files end in `.log` or `.txt`; any other ending gets
+  `.log` added.
 - **Change or ticket numbers**: YACM can ask for a change or ticket number when
   connecting (for every session that logs, or only in groups that ask), so a
   log is easy to find for an audit.

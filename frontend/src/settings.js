@@ -268,7 +268,7 @@ export async function openSettings(onApply, startTab) {
   const updatePreview = async () => { tplPreview.textContent = await api.LogNamePreview(st.logNameTemplate || '').catch(() => ''); };
   const tplInput = h('input', { type: 'text', value: st.logNameTemplate || '', placeholder: '{group}/{name}_{date}_{time}.log', spellcheck: false, class: 'mono-input', on: { input: e => { st.logNameTemplate = e.target.value; updatePreview(); } } });
   const tplBox = h('div', { class: 'sub-options' },
-    field('File name template', tplInput, h('span', {}, 'Tokens: {name} {host} {protocol} {user} {group} {path} {date} {time} {ticket}. A “/” starts a subfolder; {path} makes one folder per group. Example session core-sw1 in DC / Zagreb: ', tplPreview)),
+    field('File name template', tplInput, h('span', {}, 'Tokens: {name} {host} {protocol} {user} {group} {path} {date} {time} {stamp} {ticket}. {stamp} is the date and time without dashes (20261113-103743); without a template the name is {name}_{stamp}.log, and {name}_{stamp}.txt gives the same name ending in .txt. A “/” starts a subfolder; {path} makes one folder per group. Example session core-sw1 in DC / Zagreb: ', tplPreview)),
     check('Allow groups and sessions to use their own template', h('input', { type: 'checkbox', checked: !!st.logNameOwn, on: { change: e => (st.logNameOwn = e.target.checked) } }), 'Set under Edit group and Edit > Terminal and logs; empty there means this template.'));
   const tplOn = h('input', { type: 'checkbox', checked: !!st.logNameTemplateOn, on: { change: e => { st.logNameTemplateOn = e.target.checked; tplBox.hidden = !e.target.checked; } } });
   tplBox.hidden = !st.logNameTemplateOn;

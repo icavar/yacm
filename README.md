@@ -9,9 +9,11 @@
 **One connection manager for all your devices. Free and open source.**
 
 YACM (Yet Another Connection Manager) keeps your SSH, telnet and serial
-sessions in one place, whether you look after a few devices on your own or
-thousands with your team. For Windows, macOS and Linux. Website:
-[yacm.app](https://yacm.app).
+sessions in one place, on Windows, macOS and Linux. It is built for network
+engineers and works for anyone who looks after devices or servers, a few on
+your own or thousands with a team: share sessions with your colleagues
+without sharing passwords, and get files onto devices through jump hosts with
+the copy command written for you. Website: [yacm.app](https://yacm.app).
 
 > **Public beta.** Versions 0.9.x are the public beta: until 1.0 they bring
 > fixes only. Please [report problems](https://github.com/yacm-app/yacm/issues).
