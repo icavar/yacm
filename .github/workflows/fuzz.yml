@@ -16,6 +16,8 @@ permissions:
 
 jobs:
   fuzz:
+    # A private copy fuzzes only on demand; the public one does it weekly.
+    if: ${{ !github.event.repository.private || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:

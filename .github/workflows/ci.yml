@@ -2,9 +2,9 @@ name: CI
 
 # A push tests on Linux only; Windows and macOS run at night when main
 # changed that day, on demand (before a release) and for pull requests, which
-# keeps runs short. A private copy never runs macOS (its minutes count ten
-# times) and runs Windows only at night and on demand or for pull requests.
-# Documentation-only changes run nothing.
+# keeps runs short. Documentation-only changes run nothing. A private copy
+# (yacm-dev), whose main is the public main, runs only for pull requests and
+# on demand, on Linux and Windows: no macOS, whose minutes count ten times.
 on:
   push:
     branches: [main]
@@ -25,7 +25,7 @@ concurrency:
 jobs:
   # At night: did main change (more than documentation) in the last day?
   changed:
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' && !github.event.repository.private
     runs-on: ubuntu-24.04
     outputs:
       code: ${{ steps.log.outputs.code }}
@@ -42,7 +42,7 @@ jobs:
   test:
     name: Test (${{ matrix.os }})
     needs: changed
-    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.changed.outputs.code == 'true') }}
+    if: ${{ !cancelled() && (github.event_name != 'schedule' || needs.changed.outputs.code == 'true') && (!github.event.repository.private || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') }}
     strategy:
       fail-fast: false
       matrix:
@@ -106,7 +106,7 @@ jobs:
 
   checks:
     name: Security checks and short fuzzing
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (!github.event.repository.private || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -153,7 +153,7 @@ jobs:
 
   ui:
     name: UI tests (Playwright)
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (!github.event.repository.private || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -188,7 +188,7 @@ jobs:
 
   desktop:
     name: Desktop builds compile
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && (!github.event.repository.private || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:

@@ -52,7 +52,9 @@ jobs:
           echo "code=$([ "$n" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   linux-fabric:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.fabric != 'ceos')
+    # A private copy runs the Linux fabric only on demand (the public one
+    # runs it on every push to the same main); cEOS runs there nightly.
+    if: (github.event_name == 'push' && !github.event.repository.private) || (github.event_name == 'workflow_dispatch' && inputs.fabric != 'ceos')
     # Each lab has its own queue: a cEOS run waiting for the runner does
     # not hold up the Linux lab.
     concurrency:
